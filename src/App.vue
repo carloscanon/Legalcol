@@ -1655,6 +1655,13 @@
                     <label>Enlace PDF</label>
                     <input type="text" v-model="newNormForm.pdfUrl" placeholder="https://..." />
                   </div>
+                  <div class="form-group mt-12">
+                    <label>Video Relacionado</label>
+                    <select v-model="newNormForm.relatedVideoId" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);">
+                      <option value="">-- Ninguno / Sin Video --</option>
+                      <option v-for="video in youtubeVideosData" :key="video.id" :value="video.id">{{ video.title }}</option>
+                    </select>
+                  </div>
                   <div class="cms-form-actions">
                     <button type="submit" class="btn btn-primary">
                       <i data-lucide="save" style="width:14px;height:14px;"></i> {{ editingNormId ? 'Guardar Cambios' : 'Publicar Normativa' }}
