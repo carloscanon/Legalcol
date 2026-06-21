@@ -2765,7 +2765,7 @@ export default {
       }
     },
     async resetLogoSettings() {
-      this.logoUrl = '/logo.png';
+      this.logoUrl = '/Logo.jpg';
       this.logoWidth = 120;
       await this.saveLogoSettings();
       alert('Logo restaurado por defecto.');
@@ -3048,7 +3048,7 @@ export default {
         this.isSupabaseConnected = false;
         this.connectionStatusText = 'Desconectado / Error de credenciales';
         // Fallback a los datos locales y localStorage
-        this.logoUrl = localStorage.getItem('legalcol_logo_url') || '/logo.png';
+        this.logoUrl = localStorage.getItem('legalcol_logo_url') || '/Logo.jpg';
         this.logoWidth = parseInt(localStorage.getItem('legalcol_logo_width') || '120');
         this.homeHeroBadge = localStorage.getItem('legalcol_home_hero_badge') || 'PREMIUM ECOSYSTEM';
         this.homeHeroTitle = localStorage.getItem('legalcol_home_hero_title') || 'Encuentre cualquier norma, ley o regulación <span class="gradient-text">en segundos</span>';
