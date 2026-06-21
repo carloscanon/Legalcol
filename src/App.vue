@@ -6588,63 +6588,75 @@ CSS Styles for Biblioteca Inteligente App
   max-width: 640px;
 }
 
-/* Spectacular search bar layout */
+/* Spectacular search bar layout - Optimized for Premium UX */
 .search-bar-spectacular {
   display: flex;
   background-color: #ffffff;
-  border: 1px solid var(--border-color);
-  padding: 6px;
-  border-radius: var(--radius-lg);
-  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
+  border: 2px solid rgba(139, 92, 246, 0.2);
+  padding: 8px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(139, 92, 246, 0.05);
   width: 100%;
-  max-width: 580px;
-  margin-bottom: 40px;
-  transition: var(--transition-smooth);
+  max-width: 780px;
+  margin-bottom: 30px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .search-bar-spectacular:focus-within {
-  border-color: var(--text-primary);
-  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15);
+  border-color: #8b5cf6;
+  box-shadow: 0 25px 50px -12px rgba(139, 92, 246, 0.25), 0 0 0 4px rgba(139, 92, 246, 0.15);
+  transform: translateY(-2px);
 }
 
 .search-input-wrapper {
   display: flex;
   align-items: center;
   flex: 1;
-  padding-left: 16px;
+  padding-left: 20px;
 }
 
 .search-icon-spec {
-  color: var(--text-muted);
-  width: 20px;
-  height: 20px;
-  margin-right: 12px;
+  color: #8b5cf6;
+  width: 24px;
+  height: 24px;
+  margin-right: 14px;
 }
 
 .search-input-wrapper input {
   flex: 1;
   border: none;
-  font-size: 0.98rem;
+  font-size: 1.15rem;
+  font-weight: 500;
   color: var(--text-primary);
+  background: transparent;
+  outline: none;
+}
+
+.search-input-wrapper input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
 }
 
 .btn-search-spec {
-  background-color: var(--color-primary);
-  color: var(--bg-primary);
-  padding: 14px 24px;
-  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #4f46e5 100%);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 12px;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: var(--transition-smooth);
+  border: none;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
 .btn-search-spec:hover {
-  background-color: #1e293b;
-  transform: translateX(2px);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
 }
 
 /* Stats */
