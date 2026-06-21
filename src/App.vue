@@ -189,6 +189,23 @@
                   </button>
                 </div>
 
+                <!-- Analizador de Contratos con IA -->
+                <div class="hero-contract-analyzer mt-24 animate-slide-up" style="background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; backdrop-filter: blur(10px); transition: border-color 0.3s, background 0.3s; margin-top: 24px; margin-bottom: 24px;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.background='rgba(255, 255, 255, 0.05)'" onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.background='rgba(255, 255, 255, 0.03)'">
+                  <div style="display: flex; align-items: center; gap: 12px; text-align: left;">
+                    <div style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6; width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
+                    </div>
+                    <div>
+                      <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--text-primary);">¿Analizar un Contrato con IA?</h4>
+                      <p style="margin: 4px 0 0 0; font-size: 0.75rem; color: var(--text-secondary);">Suba su archivo (PDF, Word o TXT) para identificar riesgos y cláusulas críticas al instante.</p>
+                    </div>
+                  </div>
+                  <label class="btn btn-sm btn-primary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0;">
+                    <i data-lucide="upload" style="width: 14px; height: 14px;"></i> Subir Contrato
+                    <input type="file" accept=".pdf,.doc,.docx,.txt" @change="simulateContractAnalysis" style="display: none;" />
+                  </label>
+                </div>
+
                 <div class="hero-stats-row">
                   <div class="hero-stat-item">
                     <h3>{{ homeStat1Value }}</h3>
