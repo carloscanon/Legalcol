@@ -47,7 +47,7 @@
               </div>
               <span class="user-avatar-name">{{ currentUserSession.profile.full_name }}</span>
             </div>
-            <button class="btn btn-xs btn-outline" @click="handleLogout; mobileMenuOpen = false" title="Cerrar Sesión" style="padding: 6px;">
+            <button class="btn btn-xs btn-outline" @click="handleLogout(); mobileMenuOpen = false" title="Cerrar Sesión" style="padding: 6px;">
               <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
             </button>
           </div>
