@@ -3450,16 +3450,17 @@ export default {
         title: this.newNormForm.title,
         fullName: this.newNormForm.fullName,
         summary: this.newNormForm.summary,
-        date: new Date().toISOString().split('T')[0],
-        year: new Date().getFullYear(),
-        status: "Vigente",
+        date: this.editingNormId && this.newNormForm.date ? this.newNormForm.date : new Date().toISOString().split('T')[0],
+        year: this.editingNormId && this.newNormForm.year ? Number(this.newNormForm.year) : new Date().getFullYear(),
+        status: this.editingNormId && this.newNormForm.status ? this.newNormForm.status : "Vigente",
         sector: this.newNormForm.sector || "Tecnología y Telecomunicaciones",
         entity: this.newNormForm.entity || "Superintendencia",
         keywords: keywordsArray,
-        country: "Colombia",
+        country: this.editingNormId && this.newNormForm.country ? this.newNormForm.country : "Colombia",
         content: this.newNormForm.content || "Texto oficial de la norma...",
-        aiSummary: "Resumen IA generado de forma automática.",
-        aiObligations: [
+        pdfUrl: this.newNormForm.pdfUrl || null,
+        aiSummary: this.editingNormId && this.newNormForm.aiSummary ? this.newNormForm.aiSummary : "Resumen IA generado de forma automática.",
+        aiObligations: this.editingNormId && this.newNormForm.aiObligations ? this.newNormForm.aiObligations : [
           "Cumplir con las directrices normativas.",
           "Garantizar la actualización de los manuales de cumplimiento corporativo."
         ],
@@ -3652,7 +3653,12 @@ export default {
         sector: norm.sector,
         entity: norm.entity,
         keywords: norm.keywords ? (Array.isArray(norm.keywords) ? norm.keywords.join(', ') : norm.keywords) : '',
-        relatedVideoId: norm.relatedVideoId || ''
+        relatedVideoId: norm.relatedVideoId || '',
+        pdfUrl: norm.pdfUrl || '',
+        date: norm.date || '',
+        year: norm.year || new Date().getFullYear(),
+        status: norm.status || 'Vigente',
+        country: norm.country || 'Colombia'
       };
       this.adminActiveContentForm = 'norm';
       this.$nextTick(() => {
