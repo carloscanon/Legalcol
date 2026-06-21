@@ -2659,6 +2659,12 @@ export default {
     },
     selectedVideo() {
       this.recompileIcons();
+    },
+    adminActivePanel() {
+      this.recompileIcons();
+    },
+    adminActiveContentForm() {
+      this.recompileIcons();
     }
   },
   mounted() {
@@ -3045,6 +3051,7 @@ export default {
         this.triviaData = triviaQuestions;
         this.youtubeVideosData = youtubeVideos;
       }
+      this.recompileIcons();
     },
 
     async updateSupabaseConfig() {
