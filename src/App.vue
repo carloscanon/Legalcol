@@ -2447,6 +2447,7 @@ export default {
   name: 'App',
   data() {
     return {
+      showAuthModal: false,
       currentTab: 'home',
       normsData: norms,
       expertsData: experts,
