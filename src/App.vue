@@ -2684,9 +2684,9 @@ export default {
     }
   },
   mounted() {
+    this.loadAllData();
     this.recompileIcons();
     this.checkUserSession();
-    this.loadAllData();
   },
   methods: {
     recompileIcons() {
