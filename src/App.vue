@@ -273,26 +273,13 @@
                     </button>
                   </div>
                 </div>
-
-                <!-- Asistente Jurídico IA -->
-                <div class="hero-glass-card hover-lift secondary-card">
-                  <div class="flex align-center gap-12">
-                    <div class="badge-icon-bg bg-purple">
-                      <i data-lucide="sparkles" class="text-purple"></i>
-                    </div>
-                    <div>
-                      <h4 class="text-xs font-bold uppercase tracking">Asistente Jurídico IA</h4>
-                      <p class="text-muted text-xs">"Generando resumen ejecutivo..."</p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Quick Access Categories -->
-        <div class="container section-margin">
+        <div class="container section-margin" style="margin-top: 10px;">
           <h2 class="section-title">Acceso rápido a categorías</h2>
           <div class="grid grid-categories">
             <div class="category-card" @click="selectCategoryFilter('Ley')">
@@ -6486,7 +6473,7 @@ CSS Styles for Biblioteca Inteligente App
   position: relative;
   overflow: hidden;
   background-color: #ffffff;
-  padding: 30px 0 80px 0;
+  padding: 30px 0 35px 0;
   border-bottom: 1px solid var(--border-color);
 }
 
