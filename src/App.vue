@@ -455,7 +455,7 @@
                     </div>
 
                     <!-- Google Blue Hyperlink Header -->
-                    <h3 class="google-result-title" @click="selectedVideo = youtubeVideosData.find(v => v.id === norm.relatedVideoId) || youtubeVideosData[0] || { embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', title: norm.fullName }" style="margin-top: 4px;">
+                    <h3 class="google-result-title" @click="viewNormDetails(norm)" style="margin-top: 4px;">
                       {{ norm.fullName }} (Vigencia: {{ norm.status }})
                     </h3>
 
