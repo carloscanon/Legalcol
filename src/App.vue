@@ -3045,11 +3045,11 @@ export default {
         this.homeFeaturedVideoId = localStorage.getItem('legalcol_home_featured_videoid') || '';
         this.homeFeaturedVideoWidth = parseInt(localStorage.getItem('legalcol_home_featured_videowidth') || '550');
 
-        this.normsData = norms;
-        this.expertsData = experts;
-        this.coursesData = courses;
-        this.triviaData = triviaQuestions;
-        this.youtubeVideosData = youtubeVideos;
+        this.normsData = [];
+        this.expertsData = [];
+        this.coursesData = [];
+        this.triviaData = [];
+        this.youtubeVideosData = [];
       }
       this.recompileIcons();
     },
