@@ -208,7 +208,7 @@
               <!-- Right side: Interactive Widget Preview -->
               <div class="hero-right-col">
                 <!-- Video Destacado del Canal (Mayor Tamaño) -->
-                <div class="hero-glass-card hover-lift hero-video-card" style="width: 100%; max-width: 550px; margin-bottom: 24px;">
+                <div class="hero-glass-card hover-lift hero-video-card" :style="{ width: '100%', maxWidth: homeFeaturedVideoWidth + 'px', marginBottom: '24px' }">
                   <div class="card-glass-header mb-8" style="margin-bottom: 8px;">
                     <div class="flex align-center gap-8">
                       <i data-lucide="youtube" class="text-danger" style="width:16px; height:16px;"></i>
@@ -218,8 +218,8 @@
                   </div>
                   <div class="youtube-video-container" style="border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-sm); padding-bottom: 56.25%; position: relative; height: 0; width: 100%;">
                     <iframe 
-                      :src="youtubeVideosData[0] ? youtubeVideosData[0].embedUrl : 'https://www.youtube.com/embed/dQw4w9WgXcQ'" 
-                      :title="youtubeVideosData[0] ? youtubeVideosData[0].title : 'Video Destacado'"
+                      :src="homeFeaturedVideoId ? ('https://www.youtube.com/embed/' + homeFeaturedVideoId) : (youtubeVideosData[0] ? youtubeVideosData[0].embedUrl : 'https://www.youtube.com/embed/dQw4w9WgXcQ')" 
+                      :title="homeFeaturedVideoId ? 'Video Destacado Custom' : (youtubeVideosData[0] ? youtubeVideosData[0].title : 'Video Destacado')"
                       frameborder="0" 
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                       allowfullscreen
@@ -227,7 +227,7 @@
                     ></iframe>
                   </div>
                   <h4 class="mt-8 text-sm font-bold" style="color: var(--text-primary); line-height: 1.3; margin-top: 8px;">
-                    {{ youtubeVideosData[0] ? youtubeVideosData[0].title : 'Cumplimiento de la Ley 1581 en Colombia' }}
+                    {{ homeFeaturedVideoId ? (youtubeVideosData.find(v => v.id === homeFeaturedVideoId)?.title || 'Video Personalizado') : (youtubeVideosData[0] ? youtubeVideosData[0].title : 'Cumplimiento de la Ley 1581 en Colombia') }}
                   </h4>
                 </div>
 
@@ -1970,6 +1970,25 @@
                     <input type="text" v-model="homeStat3Label" placeholder="Asesoría Activa" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);" />
                   </div>
                 </div>
+
+                <h4 class="mt-20 mb-12" style="font-size:0.95rem;font-weight:600;">Video Destacado del Hero</h4>
+                <div class="form-group">
+                  <label>Seleccionar Video Publicado o URL/ID Personalizado</label>
+                  <select v-model="homeFeaturedVideoId" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);margin-bottom:8px;">
+                    <option value="">-- Usar último video publicado (Por Defecto) --</option>
+                    <option v-for="video in youtubeVideosData" :key="video.id" :value="video.id">{{ video.title }}</option>
+                  </select>
+                  <input type="text" v-model="homeFeaturedVideoId" placeholder="O pega el ID del video directamente (ej: dQw4w9WgXcQ)" />
+                </div>
+                <div class="form-group mt-12">
+                  <label>Ancho Máximo del Video en Inicio: {{ homeFeaturedVideoWidth }}px</label>
+                  <input type="range" v-model.number="homeFeaturedVideoWidth" min="300" max="800" step="10" style="width:100%;accent-color:var(--color-accent);" />
+                  <div class="flex justify-between text-xs text-secondary mt-4">
+                    <span>300px (Pequeño)</span>
+                    <span>550px (Estándar)</span>
+                    <span>800px (Grande)</span>
+                  </div>
+                </div>
                 
                 <button class="btn btn-primary w-full mt-20" @click="saveHomeSettings">
                   <i data-lucide="save" style="width:14px;height:14px;"></i> Guardar Configuración de Inicio
@@ -2421,6 +2440,9 @@ export default {
       homeStat2Label: localStorage.getItem('legalcol_home_stat2_lbl') || 'Precisión IA',
       homeStat3Value: localStorage.getItem('legalcol_home_stat3_val') || '24/7',
       homeStat3Label: localStorage.getItem('legalcol_home_stat3_lbl') || 'Asesoría Activa',
+      // Home page featured video customization
+      homeFeaturedVideoId: localStorage.getItem('legalcol_home_featured_videoid') || '',
+      homeFeaturedVideoWidth: parseInt(localStorage.getItem('legalcol_home_featured_videowidth') || '550'),
 
       // Supabase connection state
       supabaseUrl: '',
@@ -2747,6 +2769,8 @@ export default {
       localStorage.setItem('legalcol_home_stat2_lbl', this.homeStat2Label);
       localStorage.setItem('legalcol_home_stat3_val', this.homeStat3Value);
       localStorage.setItem('legalcol_home_stat3_lbl', this.homeStat3Label);
+      localStorage.setItem('legalcol_home_featured_videoid', this.homeFeaturedVideoId);
+      localStorage.setItem('legalcol_home_featured_videowidth', this.homeFeaturedVideoWidth.toString());
 
       if (this.isSupabaseConnected) {
         try {
@@ -2759,6 +2783,8 @@ export default {
           await saveSystemSetting('home_stat2_lbl', this.homeStat2Label);
           await saveSystemSetting('home_stat3_val', this.homeStat3Value);
           await saveSystemSetting('home_stat3_lbl', this.homeStat3Label);
+          await saveSystemSetting('home_featured_videoid', this.homeFeaturedVideoId);
+          await saveSystemSetting('home_featured_videowidth', this.homeFeaturedVideoWidth.toString());
         } catch (e) {
           console.error('Error al guardar inicio en Supabase:', e);
         }
@@ -2775,6 +2801,8 @@ export default {
       this.homeStat2Label = 'Precisión IA';
       this.homeStat3Value = '24/7';
       this.homeStat3Label = 'Asesoría Activa';
+      this.homeFeaturedVideoId = '';
+      this.homeFeaturedVideoWidth = 550;
       await this.saveHomeSettings();
     },
 
@@ -2983,6 +3011,8 @@ export default {
               if (s.key === 'home_stat2_lbl') this.homeStat2Label = s.value;
               if (s.key === 'home_stat3_val') this.homeStat3Value = s.value;
               if (s.key === 'home_stat3_lbl') this.homeStat3Label = s.value;
+              if (s.key === 'home_featured_videoid') this.homeFeaturedVideoId = s.value;
+              if (s.key === 'home_featured_videowidth') this.homeFeaturedVideoWidth = parseInt(s.value);
             });
           }
         } catch (e) {
@@ -3006,6 +3036,8 @@ export default {
         this.homeStat2Label = localStorage.getItem('legalcol_home_stat2_lbl') || 'Precisión IA';
         this.homeStat3Value = localStorage.getItem('legalcol_home_stat3_val') || '24/7';
         this.homeStat3Label = localStorage.getItem('legalcol_home_stat3_lbl') || 'Asesoría Activa';
+        this.homeFeaturedVideoId = localStorage.getItem('legalcol_home_featured_videoid') || '';
+        this.homeFeaturedVideoWidth = parseInt(localStorage.getItem('legalcol_home_featured_videowidth') || '550');
 
         this.normsData = norms;
         this.expertsData = experts;
