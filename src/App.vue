@@ -3113,7 +3113,9 @@ export default {
           { key: 'home_stat2_val', value: this.homeStat2Value },
           { key: 'home_stat2_lbl', value: this.homeStat2Label },
           { key: 'home_stat3_val', value: this.homeStat3Value },
-          { key: 'home_stat3_lbl', value: this.homeStat3Label }
+          { key: 'home_stat3_lbl', value: this.homeStat3Label },
+          { key: 'home_featured_videoid', value: this.homeFeaturedVideoId || '' },
+          { key: 'home_featured_videowidth', value: this.homeFeaturedVideoWidth.toString() }
         ]);
 
         alert('Base de datos de Supabase inicializada y configuraciones guardadas.');
