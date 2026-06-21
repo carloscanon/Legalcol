@@ -2619,12 +2619,21 @@ export default {
     filteredNorms() {
       return this.normsData.filter(norm => {
         // Query search
-        const query = this.librarySearchQuery.toLowerCase().trim();
+        const query = this.librarySearchQuery ? this.librarySearchQuery.toLowerCase().trim() : '';
         if (query) {
-          const matchTitle = norm.title.toLowerCase().includes(query);
-          const matchFull = norm.fullName.toLowerCase().includes(query);
-          const matchSummary = norm.summary.toLowerCase().includes(query);
-          const matchKeywords = norm.keywords.some(k => k.toLowerCase().includes(query));
+          const matchTitle = norm.title ? norm.title.toLowerCase().includes(query) : false;
+          const matchFull = norm.fullName ? norm.fullName.toLowerCase().includes(query) : false;
+          const matchSummary = norm.summary ? norm.summary.toLowerCase().includes(query) : false;
+          
+          let matchKeywords = false;
+          if (norm.keywords) {
+            if (Array.isArray(norm.keywords)) {
+              matchKeywords = norm.keywords.some(k => k.toLowerCase().includes(query));
+            } else if (typeof norm.keywords === 'string') {
+              matchKeywords = norm.keywords.toLowerCase().includes(query);
+            }
+          }
+
           if (!matchTitle && !matchFull && !matchSummary && !matchKeywords) {
             return false;
           }
@@ -2634,7 +2643,7 @@ export default {
         if (this.filterType && norm.type !== this.filterType) return false;
         if (this.filterSector && norm.sector !== this.filterSector) return false;
         if (this.filterStatus && norm.status !== this.filterStatus) return false;
-        if (this.filterYear && norm.year.toString() !== this.filterYear) return false;
+        if (this.filterYear && norm.year && norm.year.toString() !== this.filterYear) return false;
         if (this.filterCountry && norm.country !== this.filterCountry) return false;
 
         return true;
