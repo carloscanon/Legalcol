@@ -468,7 +468,7 @@
                     <!-- Actions / Cache simulator -->
                     <div class="google-result-actions mt-12 flex gap-16 text-xs">
                       <span class="google-action-link" @click="viewNormDetails(norm)">Ver Resumen IA</span>
-                      <span class="google-action-link" @click="simulatePDFDownload(norm)">Descargar PDF</span>
+                      <span class="google-action-link" @click="downloadPDF(norm)">Descargar PDF</span>
                       <span class="google-action-link" @click="openAIConversationForNorm(norm)">Preguntar a IA</span>
                     </div>
                   </div>
@@ -565,7 +565,7 @@
               <!-- Left: Document Core Text -->
               <div class="visor-doc-text">
                 <div class="visor-toolbar mb-16">
-                  <button class="btn btn-xs btn-outline" @click="simulatePDFDownload(selectedNorm)">
+                  <button class="btn btn-xs btn-outline" @click="downloadPDF(selectedNorm)">
                     <i data-lucide="download"></i> Descargar PDF
                   </button>
                   <button class="btn btn-xs btn-outline" @click="toggleFavorite(selectedNorm)">
@@ -2296,7 +2296,7 @@
             <div class="yt-actions-buttons">
               <button class="btn btn-xs btn-secondary-dark"><i data-lucide="thumbs-up"></i> 1.2K</button>
               <button class="btn btn-xs btn-secondary-dark"><i data-lucide="share-2"></i> Compartir</button>
-              <button class="btn btn-xs btn-secondary-dark" @click="simulatePDFDownload({ title: selectedVideo.title })"><i data-lucide="download"></i> PDF Norma</button>
+              <button class="btn btn-xs btn-secondary-dark" @click="downloadPDF({ title: selectedVideo.title })"><i data-lucide="download"></i> PDF Norma</button>
             </div>
           </div>
 
@@ -2549,7 +2549,8 @@ export default {
         sector: 'Tecnología',
         entity: 'Congreso',
         keywords: '',
-        relatedVideoId: ''
+        relatedVideoId: '',
+        pdfUrl: ''
       },
       newExpertForm: {
         id: '',
@@ -3200,11 +3201,19 @@ export default {
       this.selectedNorm = norm;
     },
 
-    simulatePDFDownload(norm) {
-      if (norm && norm.pdfUrl) {
-        window.open(norm.pdfUrl, '_blank');
+    downloadPDF(norm) {
+      if (!norm) return;
+      let targetNorm = norm;
+      if (!norm.pdfUrl && norm.title && this.normsData) {
+        const found = this.normsData.find(n => n.title === norm.title || (this.selectedVideo && n.relatedVideoId === this.selectedVideo.id));
+        if (found) {
+          targetNorm = found;
+        }
+      }
+      if (targetNorm && targetNorm.pdfUrl) {
+        window.open(targetNorm.pdfUrl, '_blank');
       } else {
-        alert(`[Descarga Simulada] El PDF oficial correspondiente a la norma "${norm ? norm.title : 'seleccionada'}" ha comenzado a descargarse.`);
+        alert(`No hay un archivo PDF oficial asociado para la norma "${targetNorm ? targetNorm.title : 'seleccionada'}". Puede asignarle un enlace PDF editando la norma en el panel de administración.`);
       }
     },
 
