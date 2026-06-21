@@ -3857,7 +3857,7 @@ CSS Styles for Biblioteca Inteligente App
 /* TOP NAVIGATION BAR */
 .header {
   border-bottom: 1px solid var(--border-color);
-  padding: 16px 0;
+  padding: 8px 0; /* Shorter padding */
 }
 
 .header-container {
@@ -6260,14 +6260,18 @@ CSS Styles for Biblioteca Inteligente App
   
   .header-container {
     flex-direction: column;
-    gap: 16px;
+    gap: 6px;
     align-items: stretch !important;
+  }
+
+  .company-logo {
+    max-width: 95px !important;
   }
 
   .mobile-menu-toggle {
     display: block !important;
-    padding: 8px;
-    font-size: 1.6rem !important;
+    padding: 4px 8px;
+    font-size: 1.4rem !important;
     line-height: 1;
   }
   
