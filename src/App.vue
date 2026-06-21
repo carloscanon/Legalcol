@@ -3,56 +3,63 @@
     <!-- TOP NAVIGATION BAR -->
     <header class="header">
       <div class="container header-container">
-        <div class="logo" @click="currentTab = 'home'" style="display: flex; align-items: center; gap: 10px;">
-          <img :src="logoUrl" :style="{ width: logoWidth + 'px', height: 'auto', borderRadius: '4px' }" class="company-logo" alt="LegalCol Logo" />
+        <div class="logo-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div class="logo" @click="currentTab = 'home'; mobileMenuOpen = false" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <img :src="logoUrl" :style="{ width: logoWidth + 'px', height: 'auto', borderRadius: '4px' }" class="company-logo" alt="LegalCol Logo" />
+          </div>
+          <!-- Hamburger button for mobile devices -->
+          <button class="mobile-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Toggle Menu" style="background: none; border: none; font-size: 1.5rem; color: var(--text-primary); cursor: pointer; display: none;">
+            <span v-if="!mobileMenuOpen">☰</span>
+            <span v-else>✕</span>
+          </button>
         </div>
 
-        <nav class="nav-links">
-          <a href="#" :class="{ active: currentTab === 'home' }" @click.prevent="currentTab = 'home'">
+        <nav class="nav-links" :class="{ 'nav-links-mobile-open': mobileMenuOpen }">
+          <a href="#" :class="{ active: currentTab === 'home' }" @click.prevent="currentTab = 'home'; mobileMenuOpen = false">
             <i data-lucide="home"></i> Inicio
           </a>
-          <a href="#" :class="{ active: currentTab === 'library' }" @click.prevent="currentTab = 'library'">
+          <a href="#" :class="{ active: currentTab === 'library' }" @click.prevent="currentTab = 'library'; mobileMenuOpen = false">
             <i data-lucide="book-open"></i> Biblioteca
           </a>
-          <a href="#" :class="{ active: currentTab === 'youtube' }" @click.prevent="currentTab = 'youtube'">
+          <a href="#" :class="{ active: currentTab === 'youtube' }" @click.prevent="currentTab = 'youtube'; mobileMenuOpen = false">
             <i data-lucide="youtube" class="text-danger"></i> LegalCol TV
           </a>
-          <a href="#" :class="{ active: currentTab === 'ia' }" @click.prevent="currentTab = 'ia'">
+          <a href="#" :class="{ active: currentTab === 'ia' }" @click.prevent="currentTab = 'ia'; mobileMenuOpen = false">
             <i data-lucide="sparkles"></i> Asistente IA
           </a>
-          <a href="#" :class="{ active: currentTab === 'marketplace' }" @click.prevent="currentTab = 'marketplace'">
+          <a href="#" :class="{ active: currentTab === 'marketplace' }" @click.prevent="currentTab = 'marketplace'; mobileMenuOpen = false">
             <i data-lucide="users"></i> Expertos & Servicios
           </a>
-          <a href="#" :class="{ active: currentTab === 'academy' }" @click.prevent="currentTab = 'academy'">
+          <a href="#" :class="{ active: currentTab === 'academy' }" @click.prevent="currentTab = 'academy'; mobileMenuOpen = false">
             <i data-lucide="graduation-cap"></i> Academia
           </a>
-          <a href="#" :class="{ active: currentTab === 'memberships' }" @click.prevent="currentTab = 'memberships'">
+          <a href="#" :class="{ active: currentTab === 'memberships' }" @click.prevent="currentTab = 'memberships'; mobileMenuOpen = false">
             <i data-lucide="credit-card"></i> Membresías
           </a>
         </nav>
 
-        <div class="header-actions">
+        <div class="header-actions" :class="{ 'header-actions-mobile-open': mobileMenuOpen }">
           <!-- Auth Trigger / Profile Indicator -->
           <div v-if="currentUserSession" class="flex align-center gap-8">
-            <div class="user-avatar-pill" @click="currentTab = 'admin'" title="Panel Administrativo">
+            <div class="user-avatar-pill" @click="currentTab = 'admin'; mobileMenuOpen = false" title="Panel Administrativo">
               <div class="user-avatar-circle">
                 {{ currentUserSession.profile.full_name ? currentUserSession.profile.full_name.charAt(0).toUpperCase() : 'U' }}
               </div>
               <span class="user-avatar-name">{{ currentUserSession.profile.full_name }}</span>
             </div>
-            <button class="btn btn-xs btn-outline" @click="handleLogout" title="Cerrar Sesión" style="padding: 6px;">
+            <button class="btn btn-xs btn-outline" @click="handleLogout; mobileMenuOpen = false" title="Cerrar Sesión" style="padding: 6px;">
               <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
             </button>
           </div>
-          <button v-else class="btn btn-xs btn-outline" @click="showAuthModal = true" style="padding: 6px 12px; font-size: 0.8rem;">
+          <button v-else class="btn btn-xs btn-outline" @click="showAuthModal = true; mobileMenuOpen = false" style="padding: 6px 12px; font-size: 0.8rem;">
             <i data-lucide="user" style="width: 14px; height: 14px;"></i> Ingresar
           </button>
 
-          <div class="cart-btn" @click="currentTab = 'marketplace'">
+          <div class="cart-btn" @click="currentTab = 'marketplace'; mobileMenuOpen = false">
             <i data-lucide="shopping-cart"></i>
             <span class="cart-badge" v-if="cart.length > 0">{{ cart.length }}</span>
           </div>
-          <button class="btn btn-primary" @click="openConsultancyModal">
+          <button class="btn btn-primary" @click="openConsultancyModal(); mobileMenuOpen = false">
             <i data-lucide="phone-call"></i> Asesoría
           </button>
         </div>
@@ -2443,6 +2450,8 @@ export default {
       editingTriviaId: '',
       // CMS Module state
       cmsSearch: '',
+      // Mobile Responsive Menu State
+      mobileMenuOpen: false,
       // Favorites list
       favorites: [],
 
@@ -6146,10 +6155,54 @@ CSS Styles for Biblioteca Inteligente App
   .header-container {
     flex-direction: column;
     gap: 16px;
+    align-items: stretch !important;
+  }
+
+  .mobile-menu-toggle {
+    display: block !important;
+    padding: 8px;
+    font-size: 1.6rem !important;
+    line-height: 1;
   }
   
   .nav-links {
-    flex-wrap: wrap;
+    display: none !important;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+    background: var(--bg-secondary);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+  }
+
+  .nav-links-mobile-open {
+    display: flex !important;
+  }
+  
+  .nav-links a {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .header-actions {
+    display: none !important;
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    background: var(--bg-secondary);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+  }
+
+  .header-actions-mobile-open {
+    display: flex !important;
+  }
+
+  .header-actions .btn {
+    width: 100%;
     justify-content: center;
   }
   
