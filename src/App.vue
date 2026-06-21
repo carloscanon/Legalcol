@@ -2708,6 +2708,10 @@ export default {
     }
   },
   mounted() {
+    if (this.homeFeaturedVideoRandom && this.youtubeVideosData && this.youtubeVideosData.length > 0) {
+      const randomIndex = Math.floor(Math.random() * this.youtubeVideosData.length);
+      this.randomVideoId = this.youtubeVideosData[randomIndex].id;
+    }
     this.loadAllData();
     this.recompileIcons();
     this.checkUserSession();
@@ -3051,7 +3055,13 @@ export default {
           if (dbTrivia) this.triviaData = dbTrivia;
           
           const dbVideos = await fetchYoutubeVideos();
-          if (dbVideos) this.youtubeVideosData = dbVideos;
+          if (dbVideos) {
+            this.youtubeVideosData = dbVideos;
+            if (this.homeFeaturedVideoRandom && this.youtubeVideosData.length > 0) {
+              const randomIndex = Math.floor(Math.random() * this.youtubeVideosData.length);
+              this.randomVideoId = this.youtubeVideosData[randomIndex].id;
+            }
+          }
 
           // Cargar configuraciones del sistema desde la base de datos
           const dbSettings = await fetchSystemSettings();
