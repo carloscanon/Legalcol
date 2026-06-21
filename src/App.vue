@@ -5811,32 +5811,35 @@ CSS Styles for Biblioteca Inteligente App
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .cms-btn-edit {
-  background: rgba(37, 99, 235, 0.08);
-  color: var(--color-accent);
+  background: var(--color-accent, #2563eb);
+  color: white !important;
 }
 
 .cms-btn-edit:hover {
-  background: var(--color-accent);
-  color: white;
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
 }
 
 .cms-btn-delete {
-  background: rgba(239, 68, 68, 0.08);
-  color: #ef4444;
+  background: #dc2626;
+  color: white !important;
 }
 
 .cms-btn-delete:hover {
-  background: #ef4444;
-  color: white;
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
 }
 
 .cms-empty {
