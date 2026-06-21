@@ -3069,6 +3069,15 @@ export default {
       this.recompileIcons();
     },
 
+    async saveAndTestSupabase() {
+      await this.updateSupabaseConfig();
+      if (this.isSupabaseConnected) {
+        alert('Supabase conectado y credenciales guardadas exitosamente.');
+      } else {
+        alert('Error al conectar. Verifica las credenciales e inténtalo de nuevo.');
+      }
+    },
+
     async syncMockDataToSupabase() {
       if (!this.isSupabaseConnected) {
         alert('Conéctese primero a Supabase.');
