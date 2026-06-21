@@ -77,6 +77,83 @@
           </div>
           
           <div class="container hero-inner">
+            <!-- Welcome Banner / Comando Center (Only for Authenticated Users) -->
+            <div v-if="currentUserSession" class="command-welcome-box mb-32 p-24 border rounded" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); margin-bottom: 32px;">
+              <div class="flex justify-between align-center flex-wrap gap-16">
+                <div>
+                  <h2 style="font-size: 1.6rem; color: var(--text-primary); font-family: var(--font-sans); font-weight: 700;">
+                    Buenos días, {{ currentUserSession.profile.full_name }}
+                  </h2>
+                  <p class="text-secondary mt-4" style="font-size: 0.95rem; color: var(--text-secondary);">
+                    Centro de Comando Legal Inteligente. Tienes <strong class="text-danger" style="color: var(--color-danger);">3 cambios normativos pendientes</strong> por revisar y <strong>2 obligaciones</strong> que vencen esta semana.
+                  </p>
+                </div>
+                <div class="flex gap-12">
+                  <div class="badge-status vigente" style="padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-sm); font-weight: bold; background: rgba(52,168,83,0.1); color: var(--color-success); border: 1px solid rgba(52,168,83,0.2);">
+                    <i data-lucide="shield-check" style="color: var(--color-success); width:16px; height:16px;"></i>
+                    <span>Gemelo Digital Activo: 47 obligaciones</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Widgets Grid (PowerBI Dashboard Tiles style) -->
+              <div class="grid mt-24" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                <!-- Widget 1: Ultimas Busquedas (PowerBI Tile) -->
+                <div class="powerbi-tile bg-primary" style="background: var(--bg-primary); border-radius: 4px; border: 1px solid var(--border-color); border-left: 5px solid #4285f4; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; padding: 16px 16px 16px 20px;">
+                  <div>
+                    <span class="text-muted block" style="font-size: 0.75rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; color: var(--text-muted);">Historial de Consultas</span>
+                    <h4 style="font-size: 1.3rem; font-weight: 800; color: var(--text-primary); margin-top: 4px; margin-bottom: 8px;">3 Búsquedas</h4>
+                  </div>
+                  <div class="flex flex-column gap-4" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--border-color); padding-top: 6px;">
+                    <a href="#" @click.prevent="searchQuery = 'ley 1581'; triggerQuickSearch()" class="text-xs text-accent font-bold" style="color: #4285f4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; display: block;">• ley 1581</a>
+                    <a href="#" @click.prevent="searchQuery = 'Habeas Data'; triggerQuickSearch()" class="text-xs text-accent font-bold" style="color: #4285f4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; display: block;">• Habeas Data</a>
+                  </div>
+                </div>
+
+                <!-- Widget 2: Normas Consultadas (PowerBI Tile) -->
+                <div class="powerbi-tile bg-primary" style="background: var(--bg-primary); border-radius: 4px; border: 1px solid var(--border-color); border-left: 5px solid #a855f7; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; padding: 16px 16px 16px 20px;">
+                  <div>
+                    <span class="text-muted block" style="font-size: 0.75rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; color: var(--text-muted);">Normas Consultadas</span>
+                    <h4 style="font-size: 1.3rem; font-weight: 800; color: var(--text-primary); margin-top: 4px; margin-bottom: 8px;">2 Leyes</h4>
+                  </div>
+                  <div class="flex flex-column gap-4" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--border-color); padding-top: 6px;">
+                    <a href="#" @click.prevent="viewNormDetails(normsData[0])" class="text-xs text-primary font-bold" style="color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px; display: block;">• Ley 1581 de 2012</a>
+                    <a href="#" @click.prevent="viewNormDetails(normsData[1])" class="text-xs text-primary font-bold" style="color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px; display: block;">• Decreto 1377 de 2013</a>
+                  </div>
+                </div>
+
+                <!-- Widget 3: Mis Favoritos (PowerBI Tile) -->
+                <div class="powerbi-tile bg-primary" style="background: var(--bg-primary); border-radius: 4px; border: 1px solid var(--border-color); border-left: 5px solid #ef4444; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; padding: 16px 16px 16px 20px;">
+                  <div>
+                    <span class="text-muted block" style="font-size: 0.75rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; color: var(--text-muted);">Biblioteca Guardada</span>
+                    <h4 style="font-size: 1.3rem; font-weight: 800; color: var(--text-primary); margin-top: 4px; margin-bottom: 8px;">{{ favorites.length }} Favoritos</h4>
+                  </div>
+                  <div class="flex flex-column gap-4" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--border-color); padding-top: 6px;">
+                    <div v-if="favorites.length === 0" class="text-xs text-muted">Ningún favorito guardado</div>
+                    <a v-else v-for="favId in favorites.slice(0, 2)" :key="favId" href="#" @click.prevent="viewNormDetails(normsData.find(n => n.id === favId))" class="text-xs text-primary font-bold" style="color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px; display: block;">
+                      • {{ favId }}
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Widget 4: Alertas Activas (PowerBI Tile) -->
+                <div class="powerbi-tile bg-primary" style="background: var(--bg-primary); border-radius: 4px; border: 1px solid var(--border-color); border-left: 5px solid #eab308; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; padding: 16px 16px 16px 20px;">
+                  <div>
+                    <span class="text-muted block" style="font-size: 0.75rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; color: var(--text-muted);">Alertas del Sistema</span>
+                    <h4 style="font-size: 1.3rem; font-weight: 800; color: var(--text-primary); margin-top: 4px; margin-bottom: 8px;">2 Críticas</h4>
+                  </div>
+                  <div class="flex flex-column gap-4" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--border-color); padding-top: 6px;">
+                    <span class="text-xs text-danger font-bold flex align-center gap-4" style="color: #ef4444; font-size: 0.72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; display: block;">
+                      <span class="pulse-dot" style="display: inline-block; width: 6px; height: 6px; background: #ef4444; border-radius: 50%;"></span> Regulación IA (Nueva)
+                    </span>
+                    <span class="text-xs text-warning font-bold flex align-center gap-4" style="color: #eab308; font-size: 0.72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; display: block;">
+                      <span class="pulse-dot" style="display: inline-block; width: 6px; height: 6px; background: #eab308; border-radius: 50%;"></span> Cambios Ciberderecho
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="hero-grid-split">
               <!-- Left side: Text & Search -->
               <div class="hero-left-col">
@@ -335,39 +412,62 @@
             
             <!-- Left side: Google Search Results -->
             <div class="google-results-main">
-              <div v-if="filteredNorms.length > 0" class="google-results-list">
-                
-                <!-- Google Style Result Card -->
+              <div v-if="filteredNorms.length > 0" class="google-results-list">                <!-- Google Style Result Card (Video on Left, Info on Right) -->
                 <div 
                   v-for="norm in filteredNorms" 
                   :key="norm.id" 
                   class="google-result-card"
+                  style="display: flex; flex-direction: row; gap: 20px; align-items: flex-start; padding: 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; hover: box-shadow: var(--shadow-sm);"
                 >
-                  <!-- Breadcrumb and metadata -->
-                  <div class="google-result-breadcrumb">
-                    <span>https://legalcol.consultanormativa.com</span>
-                    <i data-lucide="chevron-right"></i>
-                    <span>{{ norm.type.toLowerCase() }}s</span>
-                    <i data-lucide="chevron-right"></i>
-                    <span>{{ norm.id }}</span>
+                  <!-- Video Area on the Left -->
+                  <div class="result-video-left" style="flex-shrink: 0; width: 180px; position: relative;">
+                    <div 
+                      class="youtube-video-container" 
+                      style="border-radius: 6px; overflow: hidden; box-shadow: var(--shadow-sm); padding-bottom: 56.25%; position: relative; height: 0; width: 100%; cursor: pointer;"
+                      @click="selectedVideo = youtubeVideosData.find(v => v.id === norm.relatedVideoId) || youtubeVideosData[0] || { embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', title: norm.fullName }"
+                    >
+                      <img 
+                        :src="youtubeVideosData.find(v => v.id === norm.relatedVideoId) ? youtubeVideosData.find(v => v.id === norm.relatedVideoId).thumbnail : (youtubeVideosData[0] ? youtubeVideosData[0].thumbnail : 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=400&auto=format&fit=crop')" 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" 
+                        alt="Miniatura del Video"
+                      />
+                      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.25); display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="play-circle" style="color: white; width: 36px; height: 36px;"></i>
+                      </div>
+                    </div>
+                    <div class="text-center mt-6" style="font-size: 0.7rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase;">
+                      <span>{{ youtubeVideosData.find(v => v.id === norm.relatedVideoId) ? 'Video de la Norma' : 'Ver Video General' }}</span>
+                    </div>
                   </div>
 
-                  <!-- Google Blue Hyperlink Header -->
-                  <h3 class="google-result-title" @click="viewNormDetails(norm)">
-                    {{ norm.fullName }} (Vigencia: {{ norm.status }})
-                  </h3>
+                  <!-- Text Details Area on the Right -->
+                  <div class="result-details-right" style="flex-grow: 1; min-width: 0;">
+                    <!-- Breadcrumb and metadata -->
+                    <div class="google-result-breadcrumb">
+                      <span>https://legalcol.consultanormativa.com</span>
+                      <i data-lucide="chevron-right"></i>
+                      <span>{{ norm.type.toLowerCase() }}s</span>
+                      <i data-lucide="chevron-right"></i>
+                      <span>{{ norm.id }}</span>
+                    </div>
 
-                  <!-- Snippet / Description text -->
-                  <p class="google-result-snippet">
-                    <span class="google-result-date">{{ norm.date }} — </span>
-                    {{ norm.summary }}
-                  </p>
+                    <!-- Google Blue Hyperlink Header -->
+                    <h3 class="google-result-title" @click="viewNormDetails(norm)" style="margin-top: 4px;">
+                      {{ norm.fullName }} (Vigencia: {{ norm.status }})
+                    </h3>
 
-                  <!-- Actions / Cache simulator -->
-                  <div class="google-result-actions mt-4 flex gap-16 text-xs">
-                    <span class="google-action-link" @click="viewNormDetails(norm)">Ver Resumen IA</span>
-                    <span class="google-action-link" @click="simulatePDFDownload(norm)">Descargar PDF</span>
-                    <span class="google-action-link" @click="openAIConversationForNorm(norm)">Preguntar a IA</span>
+                    <!-- Snippet / Description text -->
+                    <p class="google-result-snippet" style="margin-top: 4px;">
+                      <span class="google-result-date">{{ norm.date }} — </span>
+                      {{ norm.summary }}
+                    </p>
+
+                    <!-- Actions / Cache simulator -->
+                    <div class="google-result-actions mt-12 flex gap-16 text-xs">
+                      <span class="google-action-link" @click="viewNormDetails(norm)">Ver Resumen IA</span>
+                      <span class="google-action-link" @click="simulatePDFDownload(norm)">Descargar PDF</span>
+                      <span class="google-action-link" @click="openAIConversationForNorm(norm)">Preguntar a IA</span>
+                    </div>
                   </div>
                 </div>
 
@@ -994,33 +1094,27 @@
           <!-- YouTube Sidebar Navigation -->
           <aside class="yt-sidebar">
             <div class="yt-sidebar-group">
-              <div class="yt-sidebar-item active">
+              <div class="yt-sidebar-item" :class="{ active: currentTab === 'youtube' }" @click="currentTab = 'youtube'">
+                <i data-lucide="play"></i> <span>Canal TV</span>
+              </div>
+              <div class="yt-sidebar-item" @click="currentTab = 'home'">
                 <i data-lucide="home"></i> <span>Inicio</span>
               </div>
-              <div class="yt-sidebar-item">
+              <div class="yt-sidebar-item" @click="currentTab = 'library'">
                 <i data-lucide="compass"></i> <span>Explorar</span>
               </div>
-              <div class="yt-sidebar-item">
-                <i data-lucide="film"></i> <span>Shorts</span>
-              </div>
-              <div class="yt-sidebar-item">
-                <i data-lucide="play-square"></i> <span>Suscripciones</span>
+              <div class="yt-sidebar-item" @click="currentTab = 'ia'">
+                <i data-lucide="sparkles"></i> <span>Abogado IA</span>
               </div>
             </div>
             
             <div class="yt-sidebar-group border-top mt-12 pt-12">
               <div class="yt-sidebar-title">Tú</div>
-              <div class="yt-sidebar-item">
-                <i data-lucide="history"></i> <span>Historial</span>
+              <div class="yt-sidebar-item" @click="currentTab = 'memberships'">
+                <i data-lucide="credit-card"></i> <span>Mi Suscripción</span>
               </div>
-              <div class="yt-sidebar-item">
-                <i data-lucide="list-video"></i> <span>Listas de reproducción</span>
-              </div>
-              <div class="yt-sidebar-item">
-                <i data-lucide="clock"></i> <span>Ver más tarde</span>
-              </div>
-              <div class="yt-sidebar-item">
-                <i data-lucide="thumbs-up"></i> <span>Videos que me gustan</span>
+              <div class="yt-sidebar-item" @click="openConsultancyModal">
+                <i data-lucide="phone-call"></i> <span>Soporte 24/7</span>
               </div>
             </div>
           </aside>
@@ -1093,112 +1187,6 @@
           </main>
         </div>
 
-        <!-- YOUTUBE VIDEO PLAYER SCREEN (FULL OVERLAY SIMULATOR) -->
-        <div v-if="selectedVideo" class="yt-player-overlay animate-fade">
-          <div class="yt-player-header">
-            <div class="logo" @click="selectedVideo = null">
-              <i data-lucide="youtube" class="text-danger"></i>
-              <span class="logo-title text-white">LegalCol TV</span>
-            </div>
-            <button class="btn btn-sm btn-outline text-white border-white" @click="selectedVideo = null">
-              <i data-lucide="arrow-left"></i> Volver a la Galería
-            </button>
-          </div>
-
-          <div class="yt-player-content-layout">
-            <!-- Left Panel: Large Video & Comments -->
-            <div class="yt-player-left-col">
-              <div class="yt-video-wrapper-aspect">
-                <iframe 
-                  :src="selectedVideo.embedUrl" 
-                  title="YouTube video player" 
-                  frameborder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                  allowfullscreen
-                ></iframe>
-              </div>
-
-              <h2 class="yt-player-title mt-16">{{ selectedVideo.title }}</h2>
-              
-              <!-- Video Channel bar & Actions -->
-              <div class="yt-player-meta-action-row mt-12 pb-16 border-bottom">
-                <div class="flex align-center gap-12">
-                  <div class="yt-channel-avatar-small">L</div>
-                  <div>
-                    <h4 class="text-white">LegalCol TV <i data-lucide="check-circle" class="check-verified-icon"></i></h4>
-                    <span class="text-xs text-muted">24.5 K suscriptores</span>
-                  </div>
-                  <a href="https://www.youtube.com/@LegalCol/videos" target="_blank" class="btn btn-xs btn-youtube-red ml-12">
-                    Suscribirse
-                  </a>
-                </div>
-
-                <div class="yt-actions-buttons">
-                  <button class="btn btn-xs btn-secondary-dark"><i data-lucide="thumbs-up"></i> 1.2K</button>
-                  <button class="btn btn-xs btn-secondary-dark"><i data-lucide="share-2"></i> Compartir</button>
-                  <button class="btn btn-xs btn-secondary-dark" @click="simulatePDFDownload({ title: selectedVideo.title })"><i data-lucide="download"></i> PDF Norma</button>
-                </div>
-              </div>
-
-              <!-- Comments Section Simulation -->
-              <div class="yt-comments-section mt-24">
-                <h3>3 comentarios</h3>
-                
-                <div class="flex gap-12 mt-16">
-                  <div class="yt-user-avatar">U</div>
-                  <div class="flex-grow">
-                    <input type="text" placeholder="Añade un comentario público..." class="yt-comment-input w-full" />
-                  </div>
-                </div>
-
-                <!-- Comment 1 -->
-                <div class="yt-comment-item mt-24 flex gap-12">
-                  <div class="yt-user-avatar">CR</div>
-                  <div>
-                    <div class="flex align-center gap-8">
-                      <span class="comment-author text-white">Carlos Restrepo</span>
-                      <span class="comment-time text-muted text-xs">Hace 3 semanas</span>
-                    </div>
-                    <p class="comment-text text-sm text-secondary-light mt-4">Excelente resumen. La explicación del Artículo 15 de la Constitución y la correlación con la Superintendencia aclara mucho las obligaciones.</p>
-                  </div>
-                </div>
-
-                <!-- Comment 2 -->
-                <div class="yt-comment-item mt-16 flex gap-12">
-                  <div class="yt-user-avatar">MV</div>
-                  <div>
-                    <div class="flex align-center gap-8">
-                      <span class="comment-author text-white">María Vargas</span>
-                      <span class="comment-time text-muted text-xs">Hace 1 mes</span>
-                    </div>
-                    <p class="comment-text text-sm text-secondary-light mt-4">¿Esta circular única de la SIC aplica para empresas extranjeras que capten datos de colombianos en el exterior?</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Right Panel: Related / Suggested Video Sidebar -->
-            <div class="yt-player-right-col">
-              <h3 class="text-white text-sm mb-12">Siguiente Video</h3>
-              
-              <div class="yt-related-list">
-                <div 
-                  v-for="relVideo in youtubeVideosData.filter(v => v.id !== selectedVideo.id)" 
-                  :key="relVideo.id"
-                  class="yt-related-item flex gap-12 cursor-pointer"
-                  @click="selectedVideo = relVideo"
-                >
-                  <img :src="relVideo.thumbnail" alt="Miniatura" class="yt-related-thumb" />
-                  <div class="yt-related-info">
-                    <h4 class="text-white text-xs font-bold line-clamp-2">{{ relVideo.title }}</h4>
-                    <span class="text-muted text-xs block mt-4">LegalCol TV</span>
-                    <span class="text-muted text-xs block">{{ relVideo.views }} vistas</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       <!-- ================== 6. TAB: MEMBERSHIPS ================== -->
@@ -1325,107 +1313,80 @@
       <section v-if="currentTab === 'admin'" class="tab-panel animate-fade">
         <div class="container section-margin">
           <h2>Panel Administrativo General</h2>
-          <p class="text-secondary">Administración de la plataforma LegalCol.</p>
+          <p class="text-secondary">Indicadores clave de rendimiento (KPI) de la plataforma.</p>
 
-          <!-- Access Denied Card -->
-          <div v-if="currentUserRole !== 'admin'" class="highlight-box mt-32 text-center" style="max-width: 600px; margin: 40px auto; padding: 40px; background-color: var(--bg-primary); border: 2px solid var(--color-danger-light); border-radius: var(--radius-lg);">
-            <i data-lucide="lock" style="width: 48px; height: 48px; color: var(--color-danger); margin-bottom: 16px; margin-left: auto; margin-right: auto; display: block;"></i>
-            <h3 style="color: var(--text-primary);">Acceso Restringido</h3>
-            <p class="text-secondary mt-12" style="font-size: 0.95rem;">Para acceder a este panel de administración y moderación de contenidos, debes iniciar sesión con una cuenta de rol de <strong>Administrador</strong>.</p>
-            <p class="text-xs text-muted mt-8">Si no tienes una cuenta de administrador, puedes registrarte y seleccionar el rol de administrador en el menú <strong>Ingresar</strong> en la parte superior derecha.</p>
-            <button class="btn btn-primary mt-20" @click="showAuthModal = true">
-              Iniciar Sesión / Registrarse
-            </button>
-          </div>
-
-          <!-- Authorized Panel Content -->
-          <div v-else>
-            <!-- Admin Sub-Navigation -->
-            <div class="google-tabs-bar mt-24 mb-24" style="padding-left: 0;">
-              <div class="google-tab-item" :class="{ active: adminActivePanel === 'kpi' }" @click="adminActivePanel = 'kpi'">
-                <i data-lucide="bar-chart-2"></i> Indicadores KPIs
-              </div>
-              <div class="google-tab-item" :class="{ active: adminActivePanel === 'supabase' }" @click="adminActivePanel = 'supabase'">
-                <i data-lucide="database"></i> Configuración Supabase
-              </div>
-              <div class="google-tab-item" :class="{ active: adminActivePanel === 'content_crud' }" @click="adminActivePanel = 'content_crud'">
-                <i data-lucide="settings"></i> Gestión de Contenidos
-              </div>
-              <div class="google-tab-item" :class="{ active: adminActivePanel === 'logo' }" @click="adminActivePanel = 'logo'">
-                <i data-lucide="image"></i> Configuración Logo
-              </div>
-              <div class="google-tab-item" :class="{ active: adminActivePanel === 'home_config' }" @click="adminActivePanel = 'home_config'">
-                <i data-lucide="home"></i> Configuración Inicio
+          <!-- KPI Cards Grid -->
+          <div class="grid grid-categories mt-24">
+            <div class="kpi-card">
+              <div class="kpi-icon bg-blue"><i data-lucide="users"></i></div>
+              <div class="kpi-content">
+                <span>Usuarios Activos</span>
+                <h4>14,280</h4>
+                <p class="text-success text-xs"><i data-lucide="trending-up"></i> +12% esta semana</p>
               </div>
             </div>
-
-            <!-- SUB-PANEL 1: KPIs & Registration -->
-            <div v-if="adminActivePanel === 'kpi'">
-              <!-- KPI Cards Grid -->
-              <div class="grid grid-categories mt-24">
-                <div class="kpi-card">
-                  <div class="kpi-icon bg-blue"><i data-lucide="users"></i></div>
-                  <div class="kpi-content">
-                    <span>Usuarios Activos</span>
-                    <h4>14,280</h4>
-                    <p class="text-success text-xs"><i data-lucide="trending-up"></i> +12% esta semana</p>
-                  </div>
-                </div>
-                <div class="kpi-card">
-                  <div class="kpi-icon bg-purple"><i data-lucide="file-text"></i></div>
-                  <div class="kpi-content">
-                    <span>Normas Consultadas</span>
-                    <h4>89,450</h4>
-                    <p class="text-success text-xs"><i data-lucide="trending-up"></i> +28% este mes</p>
-                  </div>
-                </div>
-                <div class="kpi-card">
-                  <div class="kpi-icon bg-green"><i data-lucide="dollar-sign"></i></div>
-                  <div class="kpi-content">
-                    <span>Ingresos Mensuales</span>
-                    <h4>$18,450 USD</h4>
-                    <p class="text-success text-xs"><i data-lucide="trending-up"></i> +5.4% de crecimiento</p>
-                  </div>
-                </div>
-                <div class="kpi-card">
-                  <div class="kpi-icon bg-amber"><i data-lucide="phone-call"></i></div>
-                  <div class="kpi-content">
-                    <span>Consultorías Solicitadas</span>
-                    <h4>342</h4>
-                    <p class="text-secondary text-xs">Conversión: 8.9%</p>
-                  </div>
-                </div>
+            <div class="kpi-card">
+              <div class="kpi-icon bg-purple"><i data-lucide="file-text"></i></div>
+              <div class="kpi-content">
+                <span>Normas Consultadas</span>
+                <h4>89,450</h4>
+                <p class="text-success text-xs"><i data-lucide="trending-up"></i> +28% este mes</p>
               </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon bg-green"><i data-lucide="dollar-sign"></i></div>
+              <div class="kpi-content">
+                <span>Ingresos Mensuales</span>
+                <h4>$18,450 USD</h4>
+                <p class="text-success text-xs"><i data-lucide="trending-up"></i> +5.4% de crecimiento</p>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon bg-amber"><i data-lucide="phone-call"></i></div>
+              <div class="kpi-content">
+                <span>Consultorías Solicitadas</span>
+                <h4>342</h4>
+                <p class="text-secondary text-xs">Conversión: 8.9%</p>
+              </div>
+            </div>
+          </div>
 
-              <!-- Simulation Management Panels -->
-              <div class="grid grid-two-cols mt-32">
-                <!-- Left: Add Norm Form -->
-                <div class="admin-panel-card p-24 border rounded" style="background-color: var(--bg-primary); border: 1px solid var(--border-color);">
-                  <h3>Agregar Nueva Normativa</h3>
-                  <form @submit.prevent="addNewNorm" class="mt-16">
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label>Título Breve</label>
-                        <input type="text" v-model="newNormForm.title" required placeholder="Ej: Ley 2300 de 2023" />
-                      </div>
-                      <div class="form-group">
-                        <label>Tipo</label>
-                        <select v-model="newNormForm.type" required>
-                          <option value="Ley">Ley</option>
-                          <option value="Decreto">Decreto</option>
-                          <option value="Resolución">Resolución</option>
-                          <option value="Circular">Circular</option>
-                          <option value="Sentencia">Sentencia</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="form-group mt-12">
-                      <label>Nombre Completo</label>
-                      <input type="text" v-model="newNormForm.fullName" required placeholder="Ej: Ley Estatutaria 2300 de 2023 - Dejen de Fregar" />
-                    </div>
-                    <div class="form-group mt-12">
+          <!-- Simulation Management Panels -->
+          <div class="grid grid-two-cols mt-32">
+            <!-- Left: Add Norm Form -->
+            <div class="admin-panel-card p-24 border rounded">
+              <h3>Agregar Nueva Normativa</h3>
+              <form @submit.prevent="addNewNorm" class="mt-16">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Título Breve</label>
+                    <input type="text" v-model="newNormForm.title" required placeholder="Ej: Ley 2300 de 2023" />
+                  </div>
+                  <div class="form-group">
+                    <label>Tipo</label>
+                    <select v-model="newNormForm.type" required>
+                      <option value="Ley">Ley</option>
+                      <option value="Decreto">Decreto</option>
+                      <option value="Resolución">Resolución</option>
+                      <option value="Circular">Circular</option>
+                      <option value="Sentencia">Sentencia</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group mt-12">
+                  <label>Nombre Completo</label>
+                  <input type="text" v-model="newNormForm.fullName" required placeholder="Ej: Ley Estatutaria 2300 de 2023 - Dejen de Fregar" />
+                </div>                    <div class="form-group mt-12">
                       <label>Resumen Ejecutivo</label>
                       <textarea v-model="newNormForm.summary" required rows="3" placeholder="Resumen del impacto de la norma..."></textarea>
+                    </div>
+                    <div class="form-group mt-12">
+                      <label>Enlace / Link del PDF de la Norma (Opcional)</label>
+                      <input type="text" v-model="newNormForm.pdfUrl" placeholder="Ej: https://archivo.legalcol.com/ley-2300.pdf" style="width:100%; padding:8px; border:1px solid var(--border-color); border-radius:4px; background: var(--bg-secondary); color: var(--text-primary);" />
+                    </div>
+                    <div class="form-group mt-12">
+                      <label>O Subir Archivo PDF Oficial (Opcional)</label>
+                      <input type="file" accept="application/pdf" @change="handlePDFUpload" style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary);" />
                     </div>
                     <button type="submit" class="btn btn-primary mt-16 w-full">
                       Registrar Normativa en la Biblioteca
@@ -1433,370 +1394,28 @@
                   </form>
                 </div>
 
-                <!-- Right: System Activity Log -->
-                <div class="admin-panel-card p-24 border rounded" style="background-color: var(--bg-primary); border: 1px solid var(--border-color);">
-                  <h3>Bitácora de Eventos Recientes</h3>
-                  <div class="system-logs-list mt-16">
-                    <div class="log-item">
-                      <span class="log-time">08:44</span>
-                      <span class="log-text">Usuario <strong>carlos.restrepo@empresa.co</strong> mejoró al Plan Profesional.</span>
-                    </div>
-                    <div class="log-item">
-                      <span class="log-time">08:40</span>
-                      <span class="log-text">Inteligencia Artificial analizó satisfactoriamente la consulta de 'Habeas Data financiero'.</span>
-                    </div>
-                    <div class="log-item">
-                      <span class="log-time">08:32</span>
-                      <span class="log-text">Se agendó videoconferencia por Google Meet con la experta Dra. Camila Vargas.</span>
-                    </div>
-                    <div class="log-item">
-                      <span class="log-time">07:15</span>
-                      <span class="log-text">Descarga automática de PDF de la Sentencia T-240 realizada de forma correcta.</span>
-                    </div>
-                  </div>
+            <!-- Right: System Activity Log -->
+            <div class="admin-panel-card p-24 border rounded">
+              <h3>Bitácora de Eventos Recientes</h3>
+              <div class="system-logs-list mt-16">
+                <div class="log-item">
+                  <span class="log-time">08:44</span>
+                  <span class="log-text">Usuario <strong>carlos.restrepo@empresa.co</strong> mejoró al Plan Profesional.</span>
+                </div>
+                <div class="log-item">
+                  <span class="log-time">08:40</span>
+                  <span class="log-text">Inteligencia Artificial analizó satisfactoriamente la consulta de 'Habeas Data financiero'.</span>
+                </div>
+                <div class="log-item">
+                  <span class="log-time">08:32</span>
+                  <span class="log-text">Se agendó videoconferencia por Google Meet con la experta Dra. Camila Vargas.</span>
+                </div>
+                <div class="log-item">
+                  <span class="log-time">07:15</span>
+                  <span class="log-text">Descarga automática de PDF de la Sentencia T-240 realizada de forma correcta.</span>
                 </div>
               </div>
             </div>
-
-            <!-- SUB-PANEL 2: Supabase Config -->
-            <div v-if="adminActivePanel === 'supabase'">
-              <!-- Supabase Connection Config Panel -->
-              <div class="admin-panel-card p-24 border rounded bg-secondary" style="background-color: var(--bg-secondary); border: 1px solid var(--border-color);">
-                <div class="flex justify-between align-center flex-wrap gap-16">
-                  <div>
-                    <h3>Conexión con Supabase en Tiempo Real</h3>
-                    <p class="text-secondary text-sm">Configura e inicializa los objetos de base de datos directamente en tu panel.</p>
-                  </div>
-                  <!-- Status Indicator Badge -->
-                  <span class="badge-status" :class="isSupabaseConnected ? 'vigente' : 'historico'" style="padding: 6px 12px; font-weight: 700;">
-                    <span class="pulse-dot" v-if="isSupabaseConnected" style="margin-right: 6px;"></span>
-                    {{ connectionStatusText }}
-                  </span>
-                </div>
-
-                <div class="grid grid-two-cols mt-24 gap-24">
-                  <!-- Configuration Form -->
-                  <div>
-                    <div class="form-group">
-                      <label class="text-xs uppercase font-bold text-muted block mb-4">SUPABASE_URL</label>
-                      <input type="text" v-model="supabaseUrl" placeholder="https://xxxx.supabase.co" class="w-full" style="width: 100%;" />
-                    </div>
-                    <div class="form-group mt-16">
-                      <label class="text-xs uppercase font-bold text-muted block mb-4">SUPABASE_ANON_KEY</label>
-                      <input type="password" v-model="supabaseKey" placeholder="Tu clave anónima (anon key)" class="w-full" style="width: 100%;" />
-                    </div>
-
-                    <div class="flex gap-12 mt-24">
-                      <button class="btn btn-primary" @click="updateSupabaseConfig" :disabled="isTestingConnection">
-                        <span v-if="isTestingConnection">Conectando...</span>
-                        <span v-else>Guardar y Conectar</span>
-                      </button>
-                      <button class="btn btn-outline" @click="syncMockDataToSupabase" :disabled="!isSupabaseConnected || isSyncingDb" style="background-color: var(--bg-primary);">
-                        <span v-if="isSyncingDb">Sincronizando...</span>
-                        <span v-else><i data-lucide="database"></i> Poblar Base de Datos</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- SQL Console instructions -->
-                  <div>
-                    <label class="text-xs uppercase font-bold text-muted block mb-8">Estructura SQL para Supabase</label>
-                    <p class="text-xs text-muted mb-8">Crea estas tablas en el SQL Editor de tu consola de Supabase:</p>
-                    <textarea readonly rows="8" class="w-full text-xs font-mono p-12 bg-primary border rounded" style="font-family: monospace; white-space: pre; overflow-x: auto; background-color: var(--bg-primary); width: 100%; max-height: 180px;">
--- 1. TABLA DE NORMAS
-CREATE TABLE IF NOT EXISTS norms (
-    id TEXT PRIMARY KEY,
-    type TEXT NOT NULL,
-    title TEXT NOT NULL,
-    full_name TEXT NOT NULL,
-    summary TEXT NOT NULL,
-    date DATE NOT NULL,
-    year INTEGER NOT NULL,
-    status TEXT NOT NULL,
-    sector TEXT NOT NULL,
-    entity TEXT NOT NULL,
-    keywords TEXT[] DEFAULT '{}',
-    country TEXT NOT NULL,
-    content TEXT NOT NULL,
-    ai_summary TEXT NOT NULL,
-    ai_obligations TEXT[] DEFAULT '{}'
-);
-
--- 2. TABLA DE EXPERTOS
-CREATE TABLE IF NOT EXISTS experts (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    photo TEXT NOT NULL,
-    specialty TEXT NOT NULL,
-    experience TEXT NOT NULL,
-    certifications TEXT[] DEFAULT '{}',
-    success_cases TEXT NOT NULL,
-    publications TEXT[] DEFAULT '{}',
-    video_url TEXT NOT NULL,
-    price NUMERIC NOT NULL,
-    rating NUMERIC DEFAULT 5.0,
-    reviews INTEGER DEFAULT 0
-);
-
--- 3. TABLA DE CURSOS
-CREATE TABLE IF NOT EXISTS courses (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    category TEXT NOT NULL,
-    duration TEXT NOT NULL,
-    level TEXT NOT NULL,
-    instructor TEXT NOT NULL,
-    price NUMERIC NOT NULL,
-    description TEXT NOT NULL,
-    modules_count INTEGER NOT NULL,
-    badge TEXT NOT NULL,
-    image TEXT NOT NULL
-);
-
--- 4. TABLA DE PREGUNTAS DE TRIVIA
-CREATE TABLE IF NOT EXISTS trivia_questions (
-    id SERIAL PRIMARY KEY,
-    theme TEXT NOT NULL,
-    question TEXT NOT NULL,
-    options TEXT[] NOT NULL,
-    correct_index INTEGER NOT NULL,
-    explanation TEXT NOT NULL
-);
-
--- 5. TABLA DE VIDEOS
-CREATE TABLE IF NOT EXISTS youtube_videos (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    description TEXT NOT NULL,
-    duration TEXT NOT NULL,
-    views TEXT NOT NULL,
-    embed_url TEXT NOT NULL,
-    category TEXT NOT NULL,
-    thumbnail TEXT NOT NULL
-);
-                    </textarea>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- SUB-PANEL 3: Content CRUD Administration -->
-            <div v-if="adminActivePanel === 'content_crud'" class="admin-panel-card p-24 border rounded bg-secondary" style="background-color: var(--bg-secondary); border: 1px solid var(--border-color);">
-              <h3>Administración y Moderación de Contenidos</h3>
-              <p class="text-secondary text-sm">Gestiona de forma dinámica los elementos de la base de datos de Supabase.</p>
-
-              <div class="mt-24">
-                <!-- Norms CRUD List -->
-                <div class="crud-section-box mt-16 p-16 bg-primary border rounded" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-                  <h4 class="font-bold border-bottom pb-8">
-                    Normas Jurídicas en la Biblioteca ({{ normsData.length }})
-                  </h4>
-                  <div class="crud-list-container mt-12" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-                    <div v-for="norm in normsData" :key="norm.id" class="flex justify-between align-center p-8 border-bottom" style="font-size: 0.85rem;">
-                      <div>
-                        <strong>{{ norm.title }}</strong> - <span class="text-muted" style="font-size: 0.75rem;">{{ norm.fullName }}</span>
-                      </div>
-                      <button class="btn btn-xs btn-outline text-danger border-danger" @click="deleteNormEntry(norm.id)" style="padding: 4px 8px; font-size: 0.75rem; border: 1px solid var(--color-danger); color: var(--color-danger); background-color: var(--bg-primary);">
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Experts CRUD List -->
-                <div class="crud-section-box mt-24 p-16 bg-primary border rounded" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-                  <h4 class="font-bold border-bottom pb-8">
-                    Directorio de Expertos ({{ expertsData.length }})
-                  </h4>
-                  <div class="crud-list-container mt-12" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-                    <div v-for="expert in expertsData" :key="expert.id" class="flex justify-between align-center p-8 border-bottom" style="font-size: 0.85rem;">
-                      <div>
-                        <strong>{{ expert.name }}</strong> - <span class="text-muted" style="font-size: 0.75rem;">{{ expert.specialty }}</span>
-                      </div>
-                      <button class="btn btn-xs btn-outline text-danger border-danger" @click="deleteExpertEntry(expert.id)" style="padding: 4px 8px; font-size: 0.75rem; border: 1px solid var(--color-danger); color: var(--color-danger); background-color: var(--bg-primary);">
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Courses CRUD List -->
-                <div class="crud-section-box mt-24 p-16 bg-primary border rounded" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-                  <h4 class="font-bold border-bottom pb-8">
-                    Programas y Cursos de la Academia ({{ coursesData.length }})
-                  </h4>
-                  <div class="crud-list-container mt-12" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-                    <div v-for="course in coursesData" :key="course.id" class="flex justify-between align-center p-8 border-bottom" style="font-size: 0.85rem;">
-                      <div>
-                        <strong>{{ course.title }}</strong> - <span class="text-muted" style="font-size: 0.75rem;">{{ course.instructor }}</span>
-                      </div>
-                      <button class="btn btn-xs btn-outline text-danger border-danger" @click="deleteCourseEntry(course.id)" style="padding: 4px 8px; font-size: 0.75rem; border: 1px solid var(--color-danger); color: var(--color-danger); background-color: var(--bg-primary);">
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Videos CRUD List -->
-                <div class="crud-section-box mt-24 p-16 bg-primary border rounded" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-                  <h4 class="font-bold border-bottom pb-8">
-                    Videos en LegalCol TV ({{ youtubeVideosData.length }})
-                  </h4>
-                  <div class="crud-list-container mt-12" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-                    <div v-for="video in youtubeVideosData" :key="video.id" class="flex justify-between align-center p-8 border-bottom" style="font-size: 0.85rem;">
-                      <div>
-                        <strong>{{ video.title }}</strong> - <span class="text-muted" style="font-size: 0.75rem;">YouTube ID: {{ video.id }}</span>
-                      </div>
-                      <button class="btn btn-xs btn-outline text-danger border-danger" @click="deleteYoutubeVideoEntry(video.id)" style="padding: 4px 8px; font-size: 0.75rem; border: 1px solid var(--color-danger); color: var(--color-danger); background-color: var(--bg-primary);">
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Trivia Questions CRUD List -->
-                <div class="crud-section-box mt-24 p-16 bg-primary border rounded" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-                  <h4 class="font-bold border-bottom pb-8">
-                    Banco de Preguntas de Trivia ({{ triviaData.length }})
-                  </h4>
-                  <div class="crud-list-container mt-12" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-                    <div v-for="q in triviaData" :key="q.id" class="flex justify-between align-center p-8 border-bottom" style="font-size: 0.85rem;">
-                      <div>
-                        <strong>{{ q.question }}</strong> - <span class="text-muted" style="font-size: 0.75rem;">{{ q.theme }}</span>
-                      </div>
-                      <button class="btn btn-xs btn-outline text-danger border-danger" @click="deleteTriviaQuestionEntry(q.id)" style="padding: 4px 8px; font-size: 0.75rem; border: 1px solid var(--color-danger); color: var(--color-danger); background-color: var(--bg-primary);">
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-            </div>
-
-            <!-- SUB-PANEL 4: Logo and Branding Configuration -->
-            <div v-if="adminActivePanel === 'logo'" class="admin-panel-card p-24 border rounded bg-secondary animate-fade" style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); margin-top: 24px; border-radius: 8px; padding: 24px;">
-              <h3>Configuración y Redimensión del Logo Corporativo</h3>
-              <p class="text-secondary text-sm" style="margin-top: 4px; font-size: 0.85rem; color: var(--text-secondary);">
-                Administra la imagen oficial de LeyesYa, modifica su ruta y redimensiona su ancho para adaptarlo al encabezado y pie de página de la aplicación.
-              </p>
-              
-              <div class="grid grid-two-cols mt-24" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px;">
-                <div class="card bg-surface p-20 border" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px;">
-                  <h4 class="font-bold text-sm mb-12" style="font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Editar Parámetros de Marca</h4>
-                  
-                  <div class="form-group mb-16" style="margin-bottom: 16px;">
-                    <label class="form-label" style="display: block; font-size: 0.85rem; margin-bottom: 6px; font-weight: bold;">Ruta de la Imagen o URL del Logo</label>
-                    <input 
-                      type="text" 
-                      class="form-control" 
-                      v-model="logoUrl" 
-                      @input="saveLogoSettings"
-                      placeholder="Ej: /logo.png"
-                      style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary);"
-                    />
-                  </div>
-
-                  <div class="form-group mb-16" style="margin-bottom: 16px;">
-                    <label class="form-label" style="display: block; font-size: 0.85rem; margin-bottom: 6px; font-weight: bold;">Subir Nuevo Logo (Archivo Local)</label>
-                    <input 
-                      type="file" 
-                      class="form-control" 
-                      accept="image/*"
-                      @change="handleLogoUpload"
-                      style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary);"
-                    />
-                  </div>
-                  
-                  <div class="form-group mb-16" style="margin-bottom: 16px;">
-                    <label class="form-label flex justify-between" style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; font-weight: bold;">
-                      <span>Ancho del Logo (px)</span>
-                      <strong style="color: var(--color-primary);">{{ logoWidth }}px</strong>
-                    </label>
-                    <input 
-                      type="range" 
-                      min="40" 
-                      max="300" 
-                      v-model.number="logoWidth" 
-                      @input="saveLogoSettings"
-                      class="w-full"
-                      style="width: 100%; accent-color: var(--color-primary);"
-                    />
-                  </div>
-
-                  <button class="btn btn-outline btn-sm" @click="resetLogoSettings" style="padding: 6px 12px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; background: none; color: var(--text-primary); cursor: pointer;">
-                    Restaurar Logo por Defecto
-                  </button>
-                </div>
-
-                <div class="card bg-surface p-20 border flex flex-column align-center justify-center text-center" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
-                  <h4 class="font-bold text-sm mb-12" style="font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Vista Previa en Tiempo Real</h4>
-                  
-                  <div class="p-20 bg-header border w-full flex align-center justify-center mb-16" style="min-height: 150px; width: 100%; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; padding: 20px;">
-                    <img 
-                      :src="logoUrl" 
-                      :style="{ width: logoWidth + 'px', height: 'auto', maxHeight: '120px', borderRadius: '4px' }" 
-                      alt="Vista previa logo"
-                      class="logo-preview-img"
-                    />
-                  </div>
-                  
-                  <span class="text-xs text-muted" style="font-size: 0.75rem; color: var(--text-muted);">La redimensión afecta el encabezado en tiempo real.</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- SUB-PANEL 5: Homepage Configuration -->
-            <div v-if="adminActivePanel === 'home_config'" class="admin-panel-card p-24 border rounded bg-secondary animate-fade" style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); margin-top: 24px; border-radius: 8px; padding: 24px;">
-              <h3>Parametrización de la Página de Inicio</h3>
-              <p class="text-secondary text-sm" style="margin-top: 4px; font-size: 0.85rem; color: var(--text-secondary);">
-                Modifica los textos principales, el badge destacado y los indicadores estadísticos del Hero de inicio en tiempo real.
-              </p>
-              
-              <form @submit.prevent="saveHomeSettings" class="mt-24" style="display: flex; flex-direction: column; gap: 16px; margin-top: 24px;">
-                <div class="grid grid-two-cols" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                  <div class="form-group">
-                    <label style="display: block; font-size: 0.85rem; margin-bottom: 6px; font-weight: bold;">Badge Destacado</label>
-                    <input type="text" class="form-control" v-model="homeHeroBadge" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-primary); color: var(--text-primary);" />
-                  </div>
-                  <div class="form-group">
-                    <label style="display: block; font-size: 0.85rem; margin-bottom: 6px; font-weight: bold;">Título Principal (Soporta HTML)</label>
-                    <input type="text" class="form-control" v-model="homeHeroTitle" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-primary); color: var(--text-primary);" />
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label style="display: block; font-size: 0.85rem; margin-bottom: 6px; font-weight: bold;">Subtítulo Hero</label>
-                  <textarea class="form-control" v-model="homeHeroSubtitle" rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-primary); color: var(--text-primary); resize: vertical;"></textarea>
-                </div>
-
-                <h4 style="font-weight: bold; margin-top: 12px; font-size: 0.95rem;">Estadísticas del Ecosistema</h4>
-                <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
-                  <div class="card p-12 border" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
-                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold;">Métrica 1 (Valor)</label>
-                    <input type="text" class="form-control" v-model="homeStat1Value" style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary); margin-bottom: 8px;" />
-                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold;">Métrica 1 (Etiqueta)</label>
-                    <input type="text" class="form-control" v-model="homeStat1Label" style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary);" />
-                  </div>
-                  <div class="card p-12 border" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
-                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold;">Métrica 2 (Valor)</label>
-                    <input type="text" class="form-control" v-model="homeStat2Value" style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary); margin-bottom: 8px;" />
-                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold;">Métrica 2 (Etiqueta)</label>
-                    <input type="text" class="form-control" v-model="homeStat2Label" style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary);" />
-                  </div>
-                  <div class="card p-12 border" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
-                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold;">Métrica 3 (Valor)</label>
-                    <input type="text" class="form-control" v-model="homeStat3Value" style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary); margin-bottom: 8px;" />
-                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold;">Métrica 3 (Etiqueta)</label>
-                    <input type="text" class="form-control" v-model="homeStat3Label" style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary);" />
-                  </div>
-                </div>
-
-                <div class="flex gap-12 mt-12" style="display: flex; gap: 12px; margin-top: 12px;">
-                  <button type="submit" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 4px; border: none; cursor: pointer; color: white;">Guardar Configuración</button>
-                  <button type="button" class="btn btn-outline" @click="resetHomeSettings" style="padding: 10px 20px; font-size: 0.85rem; background: none; border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer; border-radius: 4px;">Restaurar Predeterminados</button>
-                </div>
-              </form>
-            </div>
-
           </div>
         </div>
       </section>
@@ -1932,6 +1551,113 @@ CREATE TABLE IF NOT EXISTS youtube_videos (
       </div>
     </div>
 
+    <!-- YOUTUBE VIDEO PLAYER SCREEN (FULL OVERLAY SIMULATOR) -->
+    <div v-if="selectedVideo" class="yt-player-overlay animate-fade">
+      <div class="yt-player-header">
+        <div class="logo" @click="selectedVideo = null">
+          <i data-lucide="youtube" class="text-danger"></i>
+          <span class="logo-title text-white">LegalCol TV</span>
+        </div>
+        <button class="btn btn-sm btn-outline text-white border-white" @click="selectedVideo = null">
+          <i data-lucide="arrow-left"></i> Volver
+        </button>
+      </div>
+
+      <div class="yt-player-content-layout">
+        <!-- Left Panel: Large Video & Comments -->
+        <div class="yt-player-left-col">
+          <div class="yt-video-wrapper-aspect">
+            <iframe 
+              :src="selectedVideo.embedUrl" 
+              title="YouTube video player" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              allowfullscreen
+            ></iframe>
+          </div>
+
+          <h2 class="yt-player-title mt-16">{{ selectedVideo.title }}</h2>
+          
+          <!-- Video Channel bar & Actions -->
+          <div class="yt-player-meta-action-row mt-12 pb-16 border-bottom">
+            <div class="flex align-center gap-12">
+              <div class="yt-channel-avatar-small">L</div>
+              <div>
+                <h4 class="text-white">LegalCol TV <i data-lucide="check-circle" class="check-verified-icon"></i></h4>
+                <span class="text-xs text-muted">24.5 K suscriptores</span>
+              </div>
+              <a href="https://www.youtube.com/@LegalCol/videos" target="_blank" class="btn btn-xs btn-youtube-red ml-12">
+                Suscribirse
+              </a>
+            </div>
+
+            <div class="yt-actions-buttons">
+              <button class="btn btn-xs btn-secondary-dark"><i data-lucide="thumbs-up"></i> 1.2K</button>
+              <button class="btn btn-xs btn-secondary-dark"><i data-lucide="share-2"></i> Compartir</button>
+              <button class="btn btn-xs btn-secondary-dark" @click="simulatePDFDownload({ title: selectedVideo.title })"><i data-lucide="download"></i> PDF Norma</button>
+            </div>
+          </div>
+
+          <!-- Comments Section Simulation -->
+          <div class="yt-comments-section mt-24">
+            <h3>3 comentarios</h3>
+            
+            <div class="flex gap-12 mt-16">
+              <div class="yt-user-avatar">U</div>
+              <div class="flex-grow">
+                <input type="text" placeholder="Añade un comentario público..." class="yt-comment-input w-full" />
+              </div>
+            </div>
+
+            <!-- Comment 1 -->
+            <div class="yt-comment-item mt-24 flex gap-12">
+              <div class="yt-user-avatar">CR</div>
+              <div>
+                <div class="flex align-center gap-8">
+                  <span class="comment-author text-white">Carlos Restrepo</span>
+                  <span class="comment-time text-muted text-xs">Hace 3 semanas</span>
+                </div>
+                <p class="comment-text text-sm text-secondary-light mt-4">Excelente resumen. La explicación del Artículo 15 de la Constitución y la correlación con la Superintendencia aclara mucho las obligaciones.</p>
+              </div>
+            </div>
+
+            <!-- Comment 2 -->
+            <div class="yt-comment-item mt-16 flex gap-12">
+              <div class="yt-user-avatar">MV</div>
+              <div>
+                <div class="flex align-center gap-8">
+                  <span class="comment-author text-white">María Vargas</span>
+                  <span class="comment-time text-muted text-xs">Hace 1 mes</span>
+                </div>
+                <p class="comment-text text-sm text-secondary-light mt-4">¿Esta circular única de la SIC aplica para empresas extranjeras que capten datos de colombianos en el exterior?</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: Related / Suggested Video Sidebar -->
+        <div class="yt-player-right-col">
+          <h3 class="text-white text-sm mb-12">Siguiente Video</h3>
+          
+          <div class="yt-related-list">
+            <div 
+              v-for="relVideo in youtubeVideosData.filter(v => v.id !== selectedVideo.id)" 
+              :key="relVideo.id"
+              class="yt-related-item flex gap-12 cursor-pointer"
+              @click="selectedVideo = relVideo"
+            >
+              <img :src="relVideo.thumbnail" alt="Miniatura" class="yt-related-thumb" />
+              <div class="yt-related-info">
+                <h4 class="text-white text-xs font-bold line-clamp-2">{{ relVideo.title }}</h4>
+                <span class="text-muted text-xs block mt-4">LegalCol TV</span>
+                <span class="text-muted text-xs block">{{ relVideo.views }} vistas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- FOOTER -->
     <footer class="footer">
       <div class="container footer-grid">
@@ -1992,7 +1718,10 @@ import {
   deleteExpert,
   deleteCourse,
   deleteTriviaQuestion,
-  deleteYoutubeVideo
+  deleteYoutubeVideo,
+  fetchSystemSettings,
+  saveSystemSetting,
+  insertDefaultSystemSettings
 } from './supabase.js';
 
 export default {
@@ -2034,8 +1763,8 @@ export default {
       authRoleSelection: 'user', // default registration role
       isAuthLoading: false,
       authTab: 'login',
-      showAuthModal: false,
       adminActivePanel: 'kpi', // 'kpi' | 'supabase' | 'content_crud'
+      adminActiveContentForm: 'norm',
       
       // Favorites list
       favorites: [],
@@ -2095,16 +1824,77 @@ export default {
         description: ''
       },
 
-      // Admin Form
+      // Admin Forms
       newNormForm: {
         title: '',
         type: 'Ley',
         fullName: '',
-        summary: ''
+        summary: '',
+        content: '',
+        sector: 'Tecnología',
+        entity: 'Congreso',
+        keywords: '',
+        relatedVideoId: ''
+      },
+      newExpertForm: {
+        id: '',
+        name: '',
+        photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=256&auto=format&fit=crop',
+        specialty: '',
+        experience: '',
+        price: 100
+      },
+      newCourseForm: {
+        id: '',
+        title: '',
+        category: '',
+        duration: '',
+        level: 'Básico',
+        instructor: '',
+        price: 150,
+        description: '',
+        image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=400&auto=format&fit=crop'
+      },
+      newVideoForm: {
+        id: '',
+        title: '',
+        description: '',
+        duration: '10:00',
+        views: '1K',
+        embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        category: 'Educativo',
+        thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=400&auto=format&fit=crop'
+      },
+      newTriviaForm: {
+        theme: '',
+        question: '',
+        option0: '',
+        option1: '',
+        option2: '',
+        option3: '',
+        correctIndex: 0,
+        explanation: ''
       },
 
       // Video Hub modal select state
-      selectedVideo: null
+      selectedVideo: null,
+
+      // Premium Dashboard extra data
+      selectedMapNodeInfo: null,
+      compliancePercent: 40,
+      complianceQuestions: [
+        { text: '¿Cuenta con un Manual Interno de Políticas y Procedimientos de Datos?', checked: true },
+        { text: '¿Posee un Oficial de Protección de Datos (DPO) designado?', checked: false },
+        { text: '¿Tiene implementados Avisos de Privacidad en sus puntos de captura?', checked: true },
+        { text: '¿Ha registrado sus bases de datos ante la SIC (RNBD)?', checked: false },
+        { text: '¿Cuenta con un protocolo de respuesta y reporte de brechas de seguridad?', checked: false }
+      ],
+      customAlertTopics: [
+        { name: 'Protección de Datos', icon: 'shield', enabled: true },
+        { name: 'Gobierno de Datos', icon: 'database', enabled: false },
+        { name: 'Inteligencia Artificial', icon: 'sparkles', enabled: true },
+        { name: 'Contratación Estatal', icon: 'gavel', enabled: false }
+      ]
     };
   },
   computed: {
@@ -2177,28 +1967,37 @@ export default {
       });
     },
 
-    saveLogoSettings() {
+    async saveLogoSettings() {
       localStorage.setItem('legalcol_logo_url', this.logoUrl);
       localStorage.setItem('legalcol_logo_width', this.logoWidth.toString());
+      if (this.isSupabaseConnected) {
+        try {
+          await saveSystemSetting('logo_url', this.logoUrl);
+          await saveSystemSetting('logo_width', this.logoWidth.toString());
+        } catch (e) {
+          console.error('Error al guardar logo en Supabase:', e);
+        }
+      }
     },
-    resetLogoSettings() {
+    async resetLogoSettings() {
       this.logoUrl = '/logo.png';
       this.logoWidth = 120;
-      this.saveLogoSettings();
+      await this.saveLogoSettings();
+      alert('Logo restaurado por defecto.');
     },
     handleLogoUpload(event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           this.logoUrl = e.target.result;
-          this.saveLogoSettings();
+          await this.saveLogoSettings();
         };
         reader.readAsDataURL(file);
       }
     },
 
-    saveHomeSettings() {
+    async saveHomeSettings() {
       localStorage.setItem('legalcol_home_hero_badge', this.homeHeroBadge);
       localStorage.setItem('legalcol_home_hero_title', this.homeHeroTitle);
       localStorage.setItem('legalcol_home_hero_subtitle', this.homeHeroSubtitle);
@@ -2208,9 +2007,25 @@ export default {
       localStorage.setItem('legalcol_home_stat2_lbl', this.homeStat2Label);
       localStorage.setItem('legalcol_home_stat3_val', this.homeStat3Value);
       localStorage.setItem('legalcol_home_stat3_lbl', this.homeStat3Label);
+
+      if (this.isSupabaseConnected) {
+        try {
+          await saveSystemSetting('home_hero_badge', this.homeHeroBadge);
+          await saveSystemSetting('home_hero_title', this.homeHeroTitle);
+          await saveSystemSetting('home_hero_subtitle', this.homeHeroSubtitle);
+          await saveSystemSetting('home_stat1_val', this.homeStat1Value);
+          await saveSystemSetting('home_stat1_lbl', this.homeStat1Label);
+          await saveSystemSetting('home_stat2_val', this.homeStat2Value);
+          await saveSystemSetting('home_stat2_lbl', this.homeStat2Label);
+          await saveSystemSetting('home_stat3_val', this.homeStat3Value);
+          await saveSystemSetting('home_stat3_lbl', this.homeStat3Label);
+        } catch (e) {
+          console.error('Error al guardar inicio en Supabase:', e);
+        }
+      }
       alert('Configuración de inicio guardada con éxito.');
     },
-    resetHomeSettings() {
+    async resetHomeSettings() {
       this.homeHeroBadge = 'PREMIUM ECOSYSTEM';
       this.homeHeroTitle = 'Encuentre cualquier norma, ley o regulación <span class="gradient-text">en segundos</span>';
       this.homeHeroSubtitle = 'La plataforma inteligente de clase mundial que combina una biblioteca jurídica digital con análisis de Inteligencia Artificial, academia de cumplimiento y consultoría especializada.';
@@ -2220,12 +2035,13 @@ export default {
       this.homeStat2Label = 'Precisión IA';
       this.homeStat3Value = '24/7';
       this.homeStat3Label = 'Asesoría Activa';
-      this.saveHomeSettings();
+      await this.saveHomeSettings();
     },
 
     // Session and Auth management
     async checkUserSession() {
-      if (!testConnection()) return;
+      const isConnected = await testConnection();
+      if (!isConnected) return;
       try {
         const session = await getCurrentUserSession();
         if (session) {
@@ -2374,19 +2190,37 @@ export default {
         this.connectionStatusText = 'Conectado';
         try {
           const dbNorms = await fetchNorms();
-          if (dbNorms && dbNorms.length > 0) this.normsData = dbNorms;
+          if (dbNorms) this.normsData = dbNorms;
           
           const dbExperts = await fetchExperts();
-          if (dbExperts && dbExperts.length > 0) this.expertsData = dbExperts;
+          if (dbExperts) this.expertsData = dbExperts;
           
           const dbCourses = await fetchCourses();
-          if (dbCourses && dbCourses.length > 0) this.coursesData = dbCourses;
+          if (dbCourses) this.coursesData = dbCourses;
           
           const dbTrivia = await fetchTriviaQuestions();
-          if (dbTrivia && dbTrivia.length > 0) this.triviaData = dbTrivia;
+          if (dbTrivia) this.triviaData = dbTrivia;
           
           const dbVideos = await fetchYoutubeVideos();
-          if (dbVideos && dbVideos.length > 0) this.youtubeVideosData = dbVideos;
+          if (dbVideos) this.youtubeVideosData = dbVideos;
+
+          // Cargar configuraciones del sistema desde la base de datos
+          const dbSettings = await fetchSystemSettings();
+          if (dbSettings && dbSettings.length > 0) {
+            dbSettings.forEach(s => {
+              if (s.key === 'logo_url') this.logoUrl = s.value;
+              if (s.key === 'logo_width') this.logoWidth = parseInt(s.value);
+              if (s.key === 'home_hero_badge') this.homeHeroBadge = s.value;
+              if (s.key === 'home_hero_title') this.homeHeroTitle = s.value;
+              if (s.key === 'home_hero_subtitle') this.homeHeroSubtitle = s.value;
+              if (s.key === 'home_stat1_val') this.homeStat1Value = s.value;
+              if (s.key === 'home_stat1_lbl') this.homeStat1Label = s.value;
+              if (s.key === 'home_stat2_val') this.homeStat2Value = s.value;
+              if (s.key === 'home_stat2_lbl') this.homeStat2Label = s.value;
+              if (s.key === 'home_stat3_val') this.homeStat3Value = s.value;
+              if (s.key === 'home_stat3_lbl') this.homeStat3Label = s.value;
+            });
+          }
         } catch (e) {
           console.error('Error al cargar datos desde Supabase:', e);
         }
@@ -2396,7 +2230,19 @@ export default {
       } else {
         this.isSupabaseConnected = false;
         this.connectionStatusText = 'Desconectado / Error de credenciales';
-        // Fallback a los datos locales
+        // Fallback a los datos locales y localStorage
+        this.logoUrl = localStorage.getItem('legalcol_logo_url') || '/logo.png';
+        this.logoWidth = parseInt(localStorage.getItem('legalcol_logo_width') || '120');
+        this.homeHeroBadge = localStorage.getItem('legalcol_home_hero_badge') || 'PREMIUM ECOSYSTEM';
+        this.homeHeroTitle = localStorage.getItem('legalcol_home_hero_title') || 'Encuentre cualquier norma, ley o regulación <span class="gradient-text">en segundos</span>';
+        this.homeHeroSubtitle = localStorage.getItem('legalcol_home_hero_subtitle') || 'La plataforma inteligente de clase mundial que combina una biblioteca jurídica digital con análisis de Inteligencia Artificial, academia de cumplimiento y consultoría especializada.';
+        this.homeStat1Value = localStorage.getItem('legalcol_home_stat1_val') || '15K+';
+        this.homeStat1Label = localStorage.getItem('legalcol_home_stat1_lbl') || 'Documentos';
+        this.homeStat2Value = localStorage.getItem('legalcol_home_stat2_val') || '99.8%';
+        this.homeStat2Label = localStorage.getItem('legalcol_home_stat2_lbl') || 'Precisión IA';
+        this.homeStat3Value = localStorage.getItem('legalcol_home_stat3_val') || '24/7';
+        this.homeStat3Label = localStorage.getItem('legalcol_home_stat3_lbl') || 'Asesoría Activa';
+
         this.normsData = norms;
         this.expertsData = experts;
         this.coursesData = courses;
@@ -2425,11 +2271,27 @@ export default {
         await insertCourses(courses);
         await insertTriviaQuestions(triviaQuestions);
         await insertYoutubeVideos(youtubeVideos);
-        alert('Base de datos de Supabase inicializada y poblada con datos de prueba.');
+
+        // Poblado inicial de las configuraciones de marca e inicio
+        await insertDefaultSystemSettings([
+          { key: 'logo_url', value: this.logoUrl },
+          { key: 'logo_width', value: this.logoWidth.toString() },
+          { key: 'home_hero_badge', value: this.homeHeroBadge },
+          { key: 'home_hero_title', value: this.homeHeroTitle },
+          { key: 'home_hero_subtitle', value: this.homeHeroSubtitle },
+          { key: 'home_stat1_val', value: this.homeStat1Value },
+          { key: 'home_stat1_lbl', value: this.homeStat1Label },
+          { key: 'home_stat2_val', value: this.homeStat2Value },
+          { key: 'home_stat2_lbl', value: this.homeStat2Label },
+          { key: 'home_stat3_val', value: this.homeStat3Value },
+          { key: 'home_stat3_lbl', value: this.homeStat3Label }
+        ]);
+
+        alert('Base de datos de Supabase inicializada y configuraciones guardadas.');
         await this.loadAllData();
       } catch (e) {
         console.error(e);
-        alert('Error al inicializar datos. Asegúrese de haber creado los objetos en Supabase usando el script SQL: ' + e.message);
+        alert('Error al inicializar datos: ' + e.message);
       } finally {
         this.isSyncingDb = false;
       }
@@ -2439,6 +2301,54 @@ export default {
     triggerQuickSearch() {
       this.librarySearchQuery = this.searchQuery;
       this.currentTab = 'library';
+    },
+
+    // Interactive Knowledge Map
+    selectMapNode(nodeId) {
+      const found = this.normsData.find(n => n.id === nodeId);
+      if (found) {
+        this.selectedMapNodeInfo = found;
+      }
+    },
+    resetKnowledgeMap() {
+      this.selectedMapNodeInfo = null;
+    },
+
+    // Compliance module
+    recalculateCompliance() {
+      const checkedCount = this.complianceQuestions.filter(q => q.checked).length;
+      this.compliancePercent = Math.round((checkedCount / this.complianceQuestions.length) * 100);
+    },
+    generateActionPlanDocument() {
+      alert(`[Descarga Simulada] Generando reporte oficial de Cumplimiento en PDF...\n\nNivel de cumplimiento: ${this.compliancePercent}%\n\nPendientes:\n` + 
+        this.complianceQuestions.filter(q => !q.checked).map(q => `• ${q.text}`).join('\n')
+      );
+    },
+
+    // Alerts customization
+    saveAlertPreferences() {
+      // Auto-save message helper
+      console.log('Preferencia de alerta guardada:', this.customAlertTopics);
+    },
+
+    // Contract analysis simulation
+    simulateContractAnalysis(event) {
+      const file = event.target.files[0];
+      if (file) {
+        alert(`Analizando archivo "${file.name}" con Inteligencia Artificial...\n\nResultados en 3 segundos.`);
+        setTimeout(() => {
+          this.chatContextNorm = null;
+          this.currentTab = 'ia';
+          this.chatHistory.push({
+            sender: 'assistant',
+            text: `<strong>Análisis de Contrato (${file.name}):</strong><br/>` +
+              `⚠️ <strong>Riesgos Críticos:</strong> Cláusula de indemnidad desequilibrada (Sección 8.2), Jurisdicción no favorable en caso de litigio (Sección 12).<br/>` +
+              `💡 <strong>Recomendación:</strong> Negociar límite de responsabilidad al 100% del valor del contrato y cambiar foro a Bogotá, Colombia.`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+          this.scrollToChatBottom();
+        }, 1500);
+      }
     },
     
     selectCategoryFilter(type) {
@@ -2463,7 +2373,11 @@ export default {
     },
 
     simulatePDFDownload(norm) {
-      alert(`[Descarga Simulada] El PDF oficial correspondiente a la norma "${norm.title}" ha comenzado a descargarse.`);
+      if (norm && norm.pdfUrl) {
+        window.open(norm.pdfUrl, '_blank');
+      } else {
+        alert(`[Descarga Simulada] El PDF oficial correspondiente a la norma "${norm ? norm.title : 'seleccionada'}" ha comenzado a descargarse.`);
+      }
     },
 
     toggleFavorite(norm) {
@@ -2716,9 +2630,10 @@ export default {
       this.diagnosisData = { companyName: '', email: '', description: '' };
     },
 
-    // Admin Panel
+    // Admin Panel Actions
     async addNewNorm() {
-      const id = this.newNormForm.title.toLowerCase().replace(/ /g, '-');
+      const id = this.newNormForm.title.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
+      const keywordsArray = this.newNormForm.keywords ? this.newNormForm.keywords.split(',').map(k => k.trim()) : ["Norma", "Regulación"];
       const mockNorm = {
         id,
         type: this.newNormForm.type,
@@ -2728,33 +2643,245 @@ export default {
         date: new Date().toISOString().split('T')[0],
         year: new Date().getFullYear(),
         status: "Vigente",
-        sector: "Tecnología y Telecomunicaciones",
-        entity: "Superintendencia",
-        keywords: ["Norma", "Novedad", "Regulación"],
+        sector: this.newNormForm.sector || "Tecnología y Telecomunicaciones",
+        entity: this.newNormForm.entity || "Superintendencia",
+        keywords: keywordsArray,
         country: "Colombia",
-        content: "Texto oficial insertado por administración en el panel...",
+        content: this.newNormForm.content || "Texto oficial de la norma...",
         aiSummary: "Resumen IA generado de forma automática.",
         aiObligations: [
           "Cumplir con las directrices normativas.",
-          "Garantizar la actualización del personal corporativo."
-        ]
+          "Garantizar la actualización de los manuales de cumplimiento corporativo."
+        ],
+        relatedVideoId: this.newNormForm.relatedVideoId || null
       };
       
       if (this.isSupabaseConnected) {
         try {
           await insertNorms([mockNorm]);
-          alert(`Normativa registrada y guardada de forma persistente en Supabase.`);
+          alert(`Normativa registrada de forma persistente en la Base de Datos.`);
         } catch (e) {
           console.error(e);
-          alert(`Error al guardar en base de datos, guardando temporalmente en memoria: ` + e.message);
+          alert(`Error al guardar en base de datos: ` + e.message);
         }
       } else {
-        alert(`Normativa registrada temporalmente en memoria (sin conexión a base de datos).`);
+        this.normsData.unshift(mockNorm);
+        alert(`Normativa registrada temporalmente en memoria (modo local).`);
       }
       
       await this.loadAllData();
-      this.newNormForm = { title: '', type: 'Ley', fullName: '', summary: '' };
+      this.newNormForm = { title: '', type: 'Ley', fullName: '', summary: '', content: '', sector: 'Tecnología', entity: 'Congreso', keywords: '', relatedVideoId: '' };
       this.currentTab = 'library';
+    },
+
+    async addNewExpert() {
+      const mockExpert = {
+        id: this.newExpertForm.id.toLowerCase().replace(/ /g, '-'),
+        name: this.newExpertForm.name,
+        photo: this.newExpertForm.photo,
+        specialty: this.newExpertForm.specialty,
+        experience: this.newExpertForm.experience,
+        certifications: ["Certificación Profesional LegalCol"],
+        successCases: "Caso de éxito registrado en el panel administrativo.",
+        publications: ["Publicaciones e Informes de Cumplimiento"],
+        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+        price: Number(this.newExpertForm.price),
+        rating: 5.0,
+        reviews: 1
+      };
+
+      if (this.isSupabaseConnected) {
+        try {
+          await insertExperts([mockExpert]);
+          alert('Experto registrado de forma persistente en la Base de Datos.');
+        } catch (e) {
+          console.error(e);
+          alert('Error al guardar experto: ' + e.message);
+        }
+      } else {
+        this.expertsData.unshift(mockExpert);
+        alert('Experto registrado temporalmente en memoria.');
+      }
+      await this.loadAllData();
+      this.newExpertForm = { id: '', name: '', photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=256&auto=format&fit=crop', specialty: '', experience: '', price: 100 };
+      this.currentTab = 'marketplace';
+    },
+
+    async addNewCourse() {
+      const mockCourse = {
+        id: this.newCourseForm.id.toLowerCase().replace(/ /g, '-'),
+        title: this.newCourseForm.title,
+        category: this.newCourseForm.category,
+        duration: this.newCourseForm.duration,
+        level: this.newCourseForm.level,
+        instructor: this.newCourseForm.instructor,
+        price: Number(this.newCourseForm.price),
+        description: this.newCourseForm.description,
+        modulesCount: 5,
+        badge: "Insignia Academia",
+        image: this.newCourseForm.image
+      };
+
+      if (this.isSupabaseConnected) {
+        try {
+          await insertCourses([mockCourse]);
+          alert('Curso registrado de forma persistente en la Base de Datos.');
+        } catch (e) {
+          console.error(e);
+          alert('Error al guardar curso: ' + e.message);
+        }
+      } else {
+        this.coursesData.unshift(mockCourse);
+        alert('Curso registrado temporalmente en memoria.');
+      }
+      await this.loadAllData();
+      this.newCourseForm = { id: '', title: '', category: '', duration: '', level: 'Básico', instructor: '', price: 150, description: '', image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=400&auto=format&fit=crop' };
+      this.currentTab = 'academy';
+    },
+
+    async addNewVideo() {
+      let rawId = this.newVideoForm.id.trim();
+      let extractedId = rawId;
+
+      // Regular expressions to extract YouTube ID from different format URLs
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = rawId.match(regExp);
+
+      if (match && match[2].length === 11) {
+        extractedId = match[2];
+      } else {
+        // Fallback for clean 11-character IDs or other formats
+        if (rawId.includes('youtube.com/shorts/')) {
+          const parts = rawId.split('youtube.com/shorts/');
+          if (parts[1]) {
+            extractedId = parts[1].split(/[?#&]/)[0];
+          }
+        }
+      }
+
+      const mockVideo = {
+        id: extractedId,
+        title: this.newVideoForm.title,
+        description: this.newVideoForm.description,
+        duration: this.newVideoForm.duration,
+        views: this.newVideoForm.views || '100',
+        embedUrl: `https://www.youtube.com/embed/${extractedId}`,
+        category: this.newVideoForm.category,
+        thumbnail: this.newVideoForm.thumbnail || `https://img.youtube.com/vi/${extractedId}/hqdefault.jpg`
+      };
+
+      if (this.isSupabaseConnected) {
+        try {
+          await insertYoutubeVideos([mockVideo]);
+          alert('Video registrado de forma persistente en la Base de Datos.');
+        } catch (e) {
+          console.error(e);
+          alert('Error al guardar video: ' + e.message);
+        }
+      } else {
+        this.youtubeVideosData.unshift(mockVideo);
+        alert('Video registrado temporalmente en memoria.');
+      }
+      await this.loadAllData();
+      this.newVideoForm = { id: '', title: '', description: '', duration: '10:00', views: '1K', embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', category: 'Educativo', thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=400&auto=format&fit=crop' };
+      this.currentTab = 'youtube';
+    },
+
+    editNormEntry(norm) {
+      this.newNormForm = {
+        title: norm.title,
+        type: norm.type,
+        fullName: norm.fullName,
+        summary: norm.summary,
+        content: norm.content,
+        sector: norm.sector,
+        entity: norm.entity,
+        keywords: norm.keywords ? (Array.isArray(norm.keywords) ? norm.keywords.join(', ') : norm.keywords) : '',
+        relatedVideoId: norm.relatedVideoId || ''
+      };
+      this.adminActiveContentForm = 'norm';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      alert(`Los datos de la norma "${norm.title}" han sido cargados en el formulario de arriba para que puedas editarlos. Al guardar se actualizará en la base de datos.`);
+    },
+
+    editExpertEntry(expert) {
+      this.newExpertForm = {
+        id: expert.id,
+        name: expert.name,
+        photo: expert.photo,
+        specialty: expert.specialty,
+        experience: expert.experience,
+        price: expert.price
+      };
+      this.adminActiveContentForm = 'expert';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      alert(`Los datos del experto "${expert.name}" han sido cargados en el formulario de arriba para que puedas editarlos.`);
+    },
+
+    editCourseEntry(course) {
+      this.newCourseForm = {
+        id: course.id,
+        title: course.title,
+        category: course.category,
+        duration: course.duration,
+        level: course.level,
+        instructor: course.instructor,
+        price: course.price,
+        description: course.description,
+        image: course.image
+      };
+      this.adminActiveContentForm = 'course';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      alert(`Los datos del curso "${course.title}" han sido cargados en el formulario de arriba para que puedas editarlos.`);
+    },
+
+    editVideoEntry(video) {
+      this.newVideoForm = {
+        id: video.id,
+        title: video.title,
+        description: video.description,
+        duration: video.duration,
+        views: video.views,
+        embedUrl: video.embedUrl,
+        category: video.category,
+        thumbnail: video.thumbnail
+      };
+      this.adminActiveContentForm = 'video';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      alert(`Los datos del video "${video.title}" han sido cargados en el formulario de arriba para que puedas editarlos.`);
+    },
+
+    async addNewTrivia() {
+      const mockTrivia = {
+        theme: this.newTriviaForm.theme,
+        question: this.newTriviaForm.question,
+        options: [
+          this.newTriviaForm.option0,
+          this.newTriviaForm.option1,
+          this.newTriviaForm.option2,
+          this.newTriviaForm.option3
+        ],
+        correctIndex: Number(this.newTriviaForm.correctIndex),
+        explanation: this.newTriviaForm.explanation
+      };
+
+      if (this.isSupabaseConnected) {
+        try {
+          await insertTriviaQuestions([mockTrivia]);
+          alert('Pregunta de trivia registrada de forma persistente en la Base de Datos.');
+        } catch (e) {
+          console.error(e);
+          alert('Error al guardar trivia: ' + e.message);
+        }
+      } else {
+        this.triviaData.unshift({
+          id: Date.now(),
+          ...mockTrivia
+        });
+        alert('Pregunta de trivia registrada temporalmente en memoria.');
+      }
+      await this.loadAllData();
+      this.newTriviaForm = { theme: '', question: '', option0: '', option1: '', option2: '', option3: '', correctIndex: 0, explanation: '' };
     }
   }
 }
@@ -4854,7 +4981,7 @@ CSS Styles for Biblioteca Inteligente App
   position: relative;
   overflow: hidden;
   background-color: #ffffff;
-  padding: 100px 0 120px 0;
+  padding: 30px 0 80px 0;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -5120,7 +5247,7 @@ CSS Styles for Biblioteca Inteligente App
 
 /* GOOGLE-LIKE MINIMALIST SEARCH STYLING */
 .google-search-container {
-  max-width: 900px;
+  max-width: 1350px;
   margin: 30px auto;
   padding: 0 24px;
 }
@@ -5151,7 +5278,7 @@ CSS Styles for Biblioteca Inteligente App
   display: flex;
   align-items: center;
   flex: 1;
-  max-width: 630px;
+  max-width: 780px;
 }
 
 .google-search-input {
@@ -5185,7 +5312,7 @@ CSS Styles for Biblioteca Inteligente App
   display: flex;
   gap: 24px;
   border-bottom: 1px solid var(--border-color);
-  padding-left: 110px;
+  padding-left: 20px;
   margin-bottom: 12px;
 }
 
@@ -5213,7 +5340,7 @@ CSS Styles for Biblioteca Inteligente App
 
 /* Results metadata */
 .google-results-meta {
-  padding-left: 110px;
+  padding-left: 20px;
   font-size: 0.8rem;
   color: var(--text-muted);
 }
@@ -5221,9 +5348,9 @@ CSS Styles for Biblioteca Inteligente App
 /* Main Layout split */
 .google-results-layout {
   display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 48px;
-  padding-left: 110px;
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+  padding-left: 20px;
 }
 
 .google-results-main {

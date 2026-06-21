@@ -87,7 +87,9 @@ export async function fetchNorms() {
     country: item.country,
     content: item.content,
     aiSummary: item.ai_summary,
-    aiObligations: item.ai_obligations || []
+    aiObligations: item.ai_obligations || [],
+    relatedVideoId: item.related_video_id,
+    pdfUrl: item.pdf_url
   }));
 }
 
@@ -180,7 +182,9 @@ export async function insertNorms(normsList) {
     country: item.country,
     content: item.content,
     ai_summary: item.aiSummary,
-    ai_obligations: item.aiObligations
+    ai_obligations: item.aiObligations,
+    related_video_id: item.relatedVideoId,
+    pdf_url: item.pdfUrl
   }));
   const { error } = await supabaseClient.from('norms').upsert(payload, { onConflict: 'id' });
   if (error) throw error;
@@ -380,6 +384,28 @@ export async function deleteTriviaQuestion(id) {
 export async function deleteYoutubeVideo(id) {
   if (!supabaseClient) return;
   const { error } = await supabaseClient.from('youtube_videos').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/**
+ * CONFIGURACIONES DEL SISTEMA (DATABASE SETTINGS)
+ */
+export async function fetchSystemSettings() {
+  if (!supabaseClient) return null;
+  const { data, error } = await supabaseClient.from('system_settings').select('*');
+  if (error) throw error;
+  return data;
+}
+
+export async function saveSystemSetting(key, value) {
+  if (!supabaseClient) return;
+  const { error } = await supabaseClient.from('system_settings').upsert({ key, value }, { onConflict: 'key' });
+  if (error) throw error;
+}
+
+export async function insertDefaultSystemSettings(settingsArray) {
+  if (!supabaseClient) return;
+  const { error } = await supabaseClient.from('system_settings').upsert(settingsArray, { onConflict: 'key' });
   if (error) throw error;
 }
 

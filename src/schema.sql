@@ -89,6 +89,7 @@ CREATE TABLE norms (
     content TEXT NOT NULL, -- Texto completo de la norma
     ai_summary TEXT NOT NULL, -- Resumen explicativo generado por IA
     ai_obligations TEXT[] DEFAULT '{}', -- Obligaciones resumidas por IA
+    pdf_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
