@@ -5,10 +5,6 @@
       <div class="container header-container">
         <div class="logo" @click="currentTab = 'home'" style="display: flex; align-items: center; gap: 10px;">
           <img :src="logoUrl" :style="{ width: logoWidth + 'px', height: 'auto', borderRadius: '4px' }" class="company-logo" alt="LegalCol Logo" />
-          <div class="logo-text">
-            <span class="logo-title">LegalCol</span>
-            <span class="logo-tagline">Biblioteca Inteligente</span>
-          </div>
         </div>
 
         <nav class="nav-links">
@@ -33,17 +29,17 @@
           <a href="#" :class="{ active: currentTab === 'memberships' }" @click.prevent="currentTab = 'memberships'">
             <i data-lucide="credit-card"></i> Membresías
           </a>
-          <a href="#" :class="{ active: currentTab === 'admin' }" @click.prevent="currentTab = 'admin'">
-            <i data-lucide="layout-dashboard"></i> Admin
-          </a>
         </nav>
 
         <div class="header-actions">
           <!-- Auth Trigger / Profile Indicator -->
           <div v-if="currentUserSession" class="flex align-center gap-8">
-            <span class="text-xs font-bold text-secondary" style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              {{ currentUserSession.profile.full_name }}
-            </span>
+            <div class="user-avatar-pill" @click="currentTab = 'admin'" title="Panel Administrativo">
+              <div class="user-avatar-circle">
+                {{ currentUserSession.profile.full_name ? currentUserSession.profile.full_name.charAt(0).toUpperCase() : 'U' }}
+              </div>
+              <span class="user-avatar-name">{{ currentUserSession.profile.full_name }}</span>
+            </div>
             <button class="btn btn-xs btn-outline" @click="handleLogout" title="Cerrar Sesión" style="padding: 6px;">
               <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
             </button>
@@ -452,7 +448,7 @@
                     </div>
 
                     <!-- Google Blue Hyperlink Header -->
-                    <h3 class="google-result-title" @click="viewNormDetails(norm)" style="margin-top: 4px;">
+                    <h3 class="google-result-title" @click="selectedVideo = youtubeVideosData.find(v => v.id === norm.relatedVideoId) || youtubeVideosData[0] || { embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', title: norm.fullName }" style="margin-top: 4px;">
                       {{ norm.fullName }} (Vigencia: {{ norm.status }})
                     </h3>
 
@@ -1312,92 +1308,114 @@
       <!-- ================== 7. TAB: ADMIN PANEL ================== -->
       <section v-if="currentTab === 'admin'" class="tab-panel animate-fade">
         <div class="container section-margin">
-          <h2>Panel Administrativo General</h2>
-          <p class="text-secondary">Indicadores clave de rendimiento (KPI) de la plataforma.</p>
-
-          <!-- KPI Cards Grid -->
-          <div class="grid grid-categories mt-24">
-            <div class="kpi-card">
-              <div class="kpi-icon bg-blue"><i data-lucide="users"></i></div>
-              <div class="kpi-content">
-                <span>Usuarios Activos</span>
-                <h4>14,280</h4>
-                <p class="text-success text-xs"><i data-lucide="trending-up"></i> +12% esta semana</p>
-              </div>
+          
+          <!-- Admin Header -->
+          <div class="admin-header-row flex justify-between align-center flex-wrap gap-16 mb-24">
+            <div>
+              <h2 style="margin-bottom: 4px;">Panel Administrativo</h2>
+              <p class="text-secondary text-sm">Gestión centralizada de contenidos, configuración y estadísticas de la plataforma LegalCol.</p>
             </div>
-            <div class="kpi-card">
-              <div class="kpi-icon bg-purple"><i data-lucide="file-text"></i></div>
-              <div class="kpi-content">
-                <span>Normas Consultadas</span>
-                <h4>89,450</h4>
-                <p class="text-success text-xs"><i data-lucide="trending-up"></i> +28% este mes</p>
-              </div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon bg-green"><i data-lucide="dollar-sign"></i></div>
-              <div class="kpi-content">
-                <span>Ingresos Mensuales</span>
-                <h4>$18,450 USD</h4>
-                <p class="text-success text-xs"><i data-lucide="trending-up"></i> +5.4% de crecimiento</p>
-              </div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon bg-amber"><i data-lucide="phone-call"></i></div>
-              <div class="kpi-content">
-                <span>Consultorías Solicitadas</span>
-                <h4>342</h4>
-                <p class="text-secondary text-xs">Conversión: 8.9%</p>
+            <div class="flex align-center gap-8" v-if="currentUserSession">
+              <div class="badge-status vigente" style="padding: 6px 14px; font-size: 0.8rem;">
+                <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+                <span>{{ currentUserSession.profile.role === 'admin' ? 'Administrador' : currentUserSession.profile.role }}</span>
               </div>
             </div>
           </div>
 
-          <!-- Simulation Management Panels -->
-          <div class="grid grid-two-cols mt-32">
-            <!-- Left: Add Norm Form -->
-            <div class="admin-panel-card p-24 border rounded">
-              <h3>Agregar Nueva Normativa</h3>
-              <form @submit.prevent="addNewNorm" class="mt-16">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>Título Breve</label>
-                    <input type="text" v-model="newNormForm.title" required placeholder="Ej: Ley 2300 de 2023" />
-                  </div>
-                  <div class="form-group">
-                    <label>Tipo</label>
-                    <select v-model="newNormForm.type" required>
-                      <option value="Ley">Ley</option>
-                      <option value="Decreto">Decreto</option>
-                      <option value="Resolución">Resolución</option>
-                      <option value="Circular">Circular</option>
-                      <option value="Sentencia">Sentencia</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group mt-12">
-                  <label>Nombre Completo</label>
-                  <input type="text" v-model="newNormForm.fullName" required placeholder="Ej: Ley Estatutaria 2300 de 2023 - Dejen de Fregar" />
-                </div>                    <div class="form-group mt-12">
-                      <label>Resumen Ejecutivo</label>
-                      <textarea v-model="newNormForm.summary" required rows="3" placeholder="Resumen del impacto de la norma..."></textarea>
-                    </div>
-                    <div class="form-group mt-12">
-                      <label>Enlace / Link del PDF de la Norma (Opcional)</label>
-                      <input type="text" v-model="newNormForm.pdfUrl" placeholder="Ej: https://archivo.legalcol.com/ley-2300.pdf" style="width:100%; padding:8px; border:1px solid var(--border-color); border-radius:4px; background: var(--bg-secondary); color: var(--text-primary);" />
-                    </div>
-                    <div class="form-group mt-12">
-                      <label>O Subir Archivo PDF Oficial (Opcional)</label>
-                      <input type="file" accept="application/pdf" @change="handlePDFUpload" style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary);" />
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-16 w-full">
-                      Registrar Normativa en la Biblioteca
-                    </button>
-                  </form>
-                </div>
+          <!-- Admin Sub-Navigation Tabs -->
+          <div class="admin-subnav-tabs mb-32">
+            <button class="admin-subnav-btn" :class="{ active: adminActivePanel === 'kpi' }" @click="adminActivePanel = 'kpi'">
+              <i data-lucide="bar-chart-2"></i> Dashboard KPI
+            </button>
+            <button class="admin-subnav-btn" :class="{ active: adminActivePanel === 'content' }" @click="adminActivePanel = 'content'">
+              <i data-lucide="layers"></i> Gestión de Contenidos
+            </button>
+            <button class="admin-subnav-btn" :class="{ active: adminActivePanel === 'logo' }" @click="adminActivePanel = 'logo'">
+              <i data-lucide="image"></i> Logo &amp; Marca
+            </button>
+            <button class="admin-subnav-btn" :class="{ active: adminActivePanel === 'home_config' }" @click="adminActivePanel = 'home_config'">
+              <i data-lucide="layout-template"></i> Configurar Inicio
+            </button>
+            <button class="admin-subnav-btn" :class="{ active: adminActivePanel === 'supabase' }" @click="adminActivePanel = 'supabase'">
+              <i data-lucide="database"></i> Supabase DB
+            </button>
+          </div>
 
-            <!-- Right: System Activity Log -->
-            <div class="admin-panel-card p-24 border rounded">
-              <h3>Bitácora de Eventos Recientes</h3>
-              <div class="system-logs-list mt-16">
+          <!-- ===== SUB-PANEL 1: KPI Dashboard ===== -->
+          <div v-if="adminActivePanel === 'kpi'">
+            <!-- KPI Cards Grid -->
+            <div class="grid grid-categories">
+              <div class="kpi-card">
+                <div class="kpi-icon bg-blue"><i data-lucide="users"></i></div>
+                <div class="kpi-content">
+                  <span>Usuarios Activos</span>
+                  <h4>14,280</h4>
+                  <p class="text-success text-xs"><i data-lucide="trending-up"></i> +12% esta semana</p>
+                </div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-icon bg-purple"><i data-lucide="file-text"></i></div>
+                <div class="kpi-content">
+                  <span>Normas Consultadas</span>
+                  <h4>89,450</h4>
+                  <p class="text-success text-xs"><i data-lucide="trending-up"></i> +28% este mes</p>
+                </div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-icon bg-green"><i data-lucide="dollar-sign"></i></div>
+                <div class="kpi-content">
+                  <span>Ingresos Mensuales</span>
+                  <h4>$18,450 USD</h4>
+                  <p class="text-success text-xs"><i data-lucide="trending-up"></i> +5.4% de crecimiento</p>
+                </div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-icon bg-amber"><i data-lucide="phone-call"></i></div>
+                <div class="kpi-content">
+                  <span>Consultorías Solicitadas</span>
+                  <h4>342</h4>
+                  <p class="text-secondary text-xs">Conversión: 8.9%</p>
+                </div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-icon bg-blue"><i data-lucide="book-open"></i></div>
+                <div class="kpi-content">
+                  <span>Normas en Biblioteca</span>
+                  <h4>{{ normsData.length }}</h4>
+                  <p class="text-secondary text-xs">Documentos indexados</p>
+                </div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-icon bg-purple"><i data-lucide="video"></i></div>
+                <div class="kpi-content">
+                  <span>Videos en LegalCol TV</span>
+                  <h4>{{ youtubeVideosData.length }}</h4>
+                  <p class="text-secondary text-xs">Videos publicados</p>
+                </div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-icon bg-green"><i data-lucide="graduation-cap"></i></div>
+                <div class="kpi-content">
+                  <span>Cursos Publicados</span>
+                  <h4>{{ coursesData.length }}</h4>
+                  <p class="text-secondary text-xs">En academia</p>
+                </div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-icon bg-amber"><i data-lucide="user-check"></i></div>
+                <div class="kpi-content">
+                  <span>Expertos Registrados</span>
+                  <h4>{{ expertsData.length }}</h4>
+                  <p class="text-secondary text-xs">Disponibles</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="admin-panel-card p-24 border rounded mt-32">
+              <h3 class="mb-16"><i data-lucide="activity" style="display:inline;width:18px;height:18px;vertical-align:middle;margin-right:8px;"></i>Bitácora de Eventos Recientes</h3>
+              <div class="system-logs-list">
                 <div class="log-item">
                   <span class="log-time">08:44</span>
                   <span class="log-text">Usuario <strong>carlos.restrepo@empresa.co</strong> mejoró al Plan Profesional.</span>
@@ -1417,6 +1435,652 @@
               </div>
             </div>
           </div>
+
+          <!-- ===== SUB-PANEL 2: Content Management CMS ===== -->
+          <div v-if="adminActivePanel === 'content'">
+
+            <!-- CMS Header + Tipo selector -->
+            <div class="cms-header mb-20">
+              <div>
+                <h3 style="margin:0 0 2px 0;">Gestor de Contenidos</h3>
+                <p class="text-secondary text-sm">Crea, edita y elimina cualquier contenido publicado en la plataforma.</p>
+              </div>
+              <div class="cms-type-pills">
+                <button class="cms-pill" :class="{ active: adminActiveContentForm === 'norm' }" @click="adminActiveContentForm='norm'; editingNormId=''; cmsSearch=''"><i data-lucide="file-text"></i> Normativas <span class="cms-pill-count">{{ normsData.length }}</span></button>
+                <button class="cms-pill" :class="{ active: adminActiveContentForm === 'video' }" @click="adminActiveContentForm='video'; editingVideoId=''; cmsSearch=''"><i data-lucide="youtube"></i> Videos <span class="cms-pill-count">{{ youtubeVideosData.length }}</span></button>
+                <button class="cms-pill" :class="{ active: adminActiveContentForm === 'expert' }" @click="adminActiveContentForm='expert'; editingExpertId=''; cmsSearch=''"><i data-lucide="user-check"></i> Expertos <span class="cms-pill-count">{{ expertsData.length }}</span></button>
+                <button class="cms-pill" :class="{ active: adminActiveContentForm === 'course' }" @click="adminActiveContentForm='course'; editingCourseId=''; cmsSearch=''"><i data-lucide="graduation-cap"></i> Cursos <span class="cms-pill-count">{{ coursesData.length }}</span></button>
+                <button class="cms-pill" :class="{ active: adminActiveContentForm === 'trivia' }" @click="adminActiveContentForm='trivia'; editingTriviaId=''; cmsSearch=''"><i data-lucide="help-circle"></i> Trivia <span class="cms-pill-count">{{ triviaData.length }}</span></button>
+              </div>
+            </div>
+
+            <!-- CMS Layout: tabla + formulario -->
+            <div class="cms-layout">
+
+              <!-- ============ PANEL IZQUIERDO: TABLA ============ -->
+              <div class="cms-table-panel admin-panel-card border rounded">
+
+                <!-- Barra de acción: buscar + nuevo -->
+                <div class="cms-toolbar">
+                  <div class="cms-search-box">
+                    <i data-lucide="search" style="width:14px;height:14px;color:var(--text-muted);"></i>
+                    <input v-model="cmsSearch" type="text" placeholder="Buscar..." />
+                  </div>
+                  <button class="btn btn-primary btn-sm" @click="clearCmsForm()">
+                    <i data-lucide="plus" style="width:14px;height:14px;"></i> Nuevo
+                  </button>
+                </div>
+
+                <!-- ---- TABLA: NORMATIVAS ---- -->
+                <div v-if="adminActiveContentForm === 'norm'" class="cms-table-wrap">
+                  <table class="cms-table">
+                    <thead><tr><th>Tipo</th><th>Título</th><th>Sector</th><th>Entidad</th><th style="width:90px;text-align:center;">Acciones</th></tr></thead>
+                    <tbody>
+                      <tr v-for="n in normsData.filter(x => !cmsSearch || x.title?.toLowerCase().includes(cmsSearch.toLowerCase()) || x.entity?.toLowerCase().includes(cmsSearch.toLowerCase()))" :key="n.id" :class="{ 'cms-row-active': editingNormId === n.id }">
+                        <td><span class="cms-badge cms-badge-blue">{{ n.type }}</span></td>
+                        <td class="cms-cell-primary">{{ n.title }}</td>
+                        <td class="cms-cell-secondary">{{ n.sector }}</td>
+                        <td class="cms-cell-secondary">{{ n.entity }}</td>
+                        <td class="cms-actions-cell">
+                          <button class="cms-btn-edit" @click="editNormEntry(n)" title="Editar"><i data-lucide="pencil" style="width:13px;height:13px;"></i></button>
+                          <button class="cms-btn-delete" @click="deleteNormEntry(n.id)" title="Eliminar"><i data-lucide="trash-2" style="width:13px;height:13px;"></i></button>
+                        </td>
+                      </tr>
+                      <tr v-if="normsData.length === 0"><td colspan="5" class="cms-empty">No hay normativas publicadas.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- ---- TABLA: VIDEOS ---- -->
+                <div v-if="adminActiveContentForm === 'video'" class="cms-table-wrap">
+                  <table class="cms-table">
+                    <thead><tr><th>Categoría</th><th>Título</th><th>Duración</th><th>Vistas</th><th style="width:90px;text-align:center;">Acciones</th></tr></thead>
+                    <tbody>
+                      <tr v-for="v in youtubeVideosData.filter(x => !cmsSearch || x.title?.toLowerCase().includes(cmsSearch.toLowerCase()))" :key="v.id" :class="{ 'cms-row-active': editingVideoId === v.id }">
+                        <td><span class="cms-badge cms-badge-red">{{ v.category }}</span></td>
+                        <td class="cms-cell-primary">{{ v.title }}</td>
+                        <td class="cms-cell-secondary">{{ v.duration }}</td>
+                        <td class="cms-cell-secondary">{{ v.views }}</td>
+                        <td class="cms-actions-cell">
+                          <button class="cms-btn-edit" @click="editVideoEntry(v)" title="Editar"><i data-lucide="pencil" style="width:13px;height:13px;"></i></button>
+                          <button class="cms-btn-delete" @click="deleteYoutubeVideoEntry(v.id)" title="Eliminar"><i data-lucide="trash-2" style="width:13px;height:13px;"></i></button>
+                        </td>
+                      </tr>
+                      <tr v-if="youtubeVideosData.length === 0"><td colspan="5" class="cms-empty">No hay videos publicados.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- ---- TABLA: EXPERTOS ---- -->
+                <div v-if="adminActiveContentForm === 'expert'" class="cms-table-wrap">
+                  <table class="cms-table">
+                    <thead><tr><th>Foto</th><th>Nombre</th><th>Especialidad</th><th>Precio</th><th style="width:90px;text-align:center;">Acciones</th></tr></thead>
+                    <tbody>
+                      <tr v-for="e in expertsData.filter(x => !cmsSearch || x.name?.toLowerCase().includes(cmsSearch.toLowerCase()) || x.specialty?.toLowerCase().includes(cmsSearch.toLowerCase()))" :key="e.id" :class="{ 'cms-row-active': editingExpertId === e.id }">
+                        <td><img :src="e.photo" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" /></td>
+                        <td class="cms-cell-primary">{{ e.name }}</td>
+                        <td class="cms-cell-secondary">{{ e.specialty }}</td>
+                        <td class="cms-cell-secondary">${{ e.price }}</td>
+                        <td class="cms-actions-cell">
+                          <button class="cms-btn-edit" @click="editExpertEntry(e)" title="Editar"><i data-lucide="pencil" style="width:13px;height:13px;"></i></button>
+                          <button class="cms-btn-delete" @click="deleteExpertEntry(e.id)" title="Eliminar"><i data-lucide="trash-2" style="width:13px;height:13px;"></i></button>
+                        </td>
+                      </tr>
+                      <tr v-if="expertsData.length === 0"><td colspan="5" class="cms-empty">No hay expertos registrados.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- ---- TABLA: CURSOS ---- -->
+                <div v-if="adminActiveContentForm === 'course'" class="cms-table-wrap">
+                  <table class="cms-table">
+                    <thead><tr><th>Nivel</th><th>Título</th><th>Instructor</th><th>Precio</th><th style="width:90px;text-align:center;">Acciones</th></tr></thead>
+                    <tbody>
+                      <tr v-for="c in coursesData.filter(x => !cmsSearch || x.title?.toLowerCase().includes(cmsSearch.toLowerCase()) || x.instructor?.toLowerCase().includes(cmsSearch.toLowerCase()))" :key="c.id" :class="{ 'cms-row-active': editingCourseId === c.id }">
+                        <td><span class="cms-badge cms-badge-green">{{ c.level }}</span></td>
+                        <td class="cms-cell-primary">{{ c.title }}</td>
+                        <td class="cms-cell-secondary">{{ c.instructor }}</td>
+                        <td class="cms-cell-secondary">${{ c.price }}</td>
+                        <td class="cms-actions-cell">
+                          <button class="cms-btn-edit" @click="editCourseEntry(c)" title="Editar"><i data-lucide="pencil" style="width:13px;height:13px;"></i></button>
+                          <button class="cms-btn-delete" @click="deleteCourseEntry(c.id)" title="Eliminar"><i data-lucide="trash-2" style="width:13px;height:13px;"></i></button>
+                        </td>
+                      </tr>
+                      <tr v-if="coursesData.length === 0"><td colspan="5" class="cms-empty">No hay cursos registrados.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- ---- TABLA: TRIVIA ---- -->
+                <div v-if="adminActiveContentForm === 'trivia'" class="cms-table-wrap">
+                  <table class="cms-table">
+                    <thead><tr><th>Tema</th><th>Pregunta</th><th>Respuesta correcta</th><th style="width:90px;text-align:center;">Acciones</th></tr></thead>
+                    <tbody>
+                      <tr v-for="(q, idx) in triviaData.filter(x => !cmsSearch || x.question?.toLowerCase().includes(cmsSearch.toLowerCase()) || x.theme?.toLowerCase().includes(cmsSearch.toLowerCase()))" :key="q.id || idx" :class="{ 'cms-row-active': editingTriviaId === (q.id || idx) }">
+                        <td><span class="cms-badge cms-badge-amber">{{ q.theme }}</span></td>
+                        <td class="cms-cell-primary" style="max-width:240px;">{{ q.question }}</td>
+                        <td class="cms-cell-secondary" style="color:var(--color-success);">✓ {{ q.options && q.options[q.correctIndex] }}</td>
+                        <td class="cms-actions-cell">
+                          <button class="cms-btn-edit" @click="editTriviaEntry(q)" title="Editar"><i data-lucide="pencil" style="width:13px;height:13px;"></i></button>
+                          <button class="cms-btn-delete" @click="deleteTriviaQuestionEntry(q.id)" title="Eliminar"><i data-lucide="trash-2" style="width:13px;height:13px;"></i></button>
+                        </td>
+                      </tr>
+                      <tr v-if="triviaData.length === 0"><td colspan="4" class="cms-empty">No hay preguntas de trivia.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- ============ PANEL DERECHO: FORMULARIO ============ -->
+              <div class="cms-form-panel admin-panel-card border rounded">
+
+                <!-- Cabecera del formulario -->
+                <div class="cms-form-header">
+                  <div>
+                    <h4 style="margin:0;">
+                      <span v-if="adminActiveContentForm==='norm'">{{ editingNormId ? '✏️ Editar Normativa' : '+ Nueva Normativa' }}</span>
+                      <span v-if="adminActiveContentForm==='video'">{{ editingVideoId ? '✏️ Editar Video' : '+ Nuevo Video' }}</span>
+                      <span v-if="adminActiveContentForm==='expert'">{{ editingExpertId ? '✏️ Editar Experto' : '+ Nuevo Experto' }}</span>
+                      <span v-if="adminActiveContentForm==='course'">{{ editingCourseId ? '✏️ Editar Curso' : '+ Nuevo Curso' }}</span>
+                      <span v-if="adminActiveContentForm==='trivia'">{{ editingTriviaId ? '✏️ Editar Pregunta' : '+ Nueva Pregunta' }}</span>
+                    </h4>
+                    <p class="text-secondary" style="font-size:0.75rem;margin:2px 0 0 0;" v-if="editingNormId||editingVideoId||editingExpertId||editingCourseId||editingTriviaId">Modificando registro existente</p>
+                  </div>
+                  <button v-if="editingNormId||editingVideoId||editingExpertId||editingCourseId||editingTriviaId" type="button" @click="clearCmsForm()" title="Cancelar edición" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;color:var(--text-secondary);">✕ Cancelar</button>
+                </div>
+
+                <!-- === FORM: NORMATIVA === -->
+                <form v-if="adminActiveContentForm === 'norm'" @submit.prevent="addNewNorm" class="cms-form-body">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Título Breve *</label>
+                      <input type="text" v-model="newNormForm.title" required placeholder="Ej: Ley 2300 de 2023" />
+                    </div>
+                    <div class="form-group">
+                      <label>Tipo *</label>
+                      <select v-model="newNormForm.type" required>
+                        <option value="Ley">Ley</option>
+                        <option value="Decreto">Decreto</option>
+                        <option value="Resolución">Resolución</option>
+                        <option value="Circular">Circular</option>
+                        <option value="Sentencia">Sentencia</option>
+                        <option value="Acuerdo">Acuerdo</option>
+                        <option value="Directiva">Directiva</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Nombre Completo *</label>
+                    <input type="text" v-model="newNormForm.fullName" required placeholder="Ej: Ley Estatutaria 2300 de 2023..." />
+                  </div>
+                  <div class="form-row mt-12">
+                    <div class="form-group">
+                      <label>Sector</label>
+                      <select v-model="newNormForm.sector">
+                        <option value="Tecnología">Tecnología</option>
+                        <option value="Financiero">Financiero</option>
+                        <option value="Salud">Salud</option>
+                        <option value="Laboral">Laboral</option>
+                        <option value="Ambiental">Ambiental</option>
+                        <option value="Contratación">Contratación</option>
+                        <option value="Tributario">Tributario</option>
+                        <option value="Comercial">Comercial</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Entidad Emisora</label>
+                      <input type="text" v-model="newNormForm.entity" placeholder="Ej: MinTIC, SIC" />
+                    </div>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Resumen Ejecutivo *</label>
+                    <textarea v-model="newNormForm.summary" required rows="3" placeholder="Impacto y alcance de la norma..."></textarea>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Contenido / Artículos Clave</label>
+                    <textarea v-model="newNormForm.content" rows="3" placeholder="Artículos relevantes, sanciones..."></textarea>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Palabras Clave (separadas por coma)</label>
+                    <input type="text" v-model="newNormForm.keywords" placeholder="habeas data, privacidad, SIC" />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Enlace PDF</label>
+                    <input type="text" v-model="newNormForm.pdfUrl" placeholder="https://..." />
+                  </div>
+                  <div class="cms-form-actions">
+                    <button type="submit" class="btn btn-primary">
+                      <i data-lucide="save" style="width:14px;height:14px;"></i> {{ editingNormId ? 'Guardar Cambios' : 'Publicar Normativa' }}
+                    </button>
+                    <button v-if="editingNormId" type="button" @click="deleteNormEntry(editingNormId)" class="btn btn-danger">
+                      <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Eliminar
+                    </button>
+                  </div>
+                </form>
+
+                <!-- === FORM: VIDEO === -->
+                <form v-if="adminActiveContentForm === 'video'" @submit.prevent="addNewVideo" class="cms-form-body">
+                  <div class="form-group" v-if="!editingVideoId">
+                    <label>URL o ID de YouTube *</label>
+                    <input type="text" v-model="newVideoForm.id" placeholder="https://youtube.com/watch?v=... o ID" />
+                  </div>
+                  <div class="form-group" :class="editingVideoId ? '' : 'mt-12'">
+                    <label>Título *</label>
+                    <input type="text" v-model="newVideoForm.title" required placeholder="Título del video" />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Descripción *</label>
+                    <textarea v-model="newVideoForm.description" required rows="3" placeholder="Descripción del contenido..."></textarea>
+                  </div>
+                  <div class="form-row mt-12">
+                    <div class="form-group">
+                      <label>Duración</label>
+                      <input type="text" v-model="newVideoForm.duration" placeholder="14:32" />
+                    </div>
+                    <div class="form-group">
+                      <label>Visualizaciones</label>
+                      <input type="text" v-model="newVideoForm.views" placeholder="12.5K" />
+                    </div>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>URL de Embed *</label>
+                    <input type="text" v-model="newVideoForm.embedUrl" placeholder="https://www.youtube.com/embed/ID" />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Categoría</label>
+                    <select v-model="newVideoForm.category">
+                      <option value="Educativo">Educativo</option>
+                      <option value="Análisis">Análisis Normativo</option>
+                      <option value="Laboral">Laboral</option>
+                      <option value="Tributario">Tributario</option>
+                      <option value="Tecnología">Tecnología & Datos</option>
+                      <option value="Contratación">Contratación</option>
+                    </select>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>URL de Miniatura</label>
+                    <input type="text" v-model="newVideoForm.thumbnail" placeholder="https://img.youtube.com/vi/ID/hqdefault.jpg" />
+                    <div v-if="newVideoForm.thumbnail" class="mt-8">
+                      <img :src="newVideoForm.thumbnail" style="width:100%;border-radius:8px;max-height:120px;object-fit:cover;" alt="Preview miniatura" />
+                    </div>
+                  </div>
+                  <div class="cms-form-actions">
+                    <button type="submit" class="btn btn-primary">
+                      <i data-lucide="save" style="width:14px;height:14px;"></i> {{ editingVideoId ? 'Guardar Cambios' : 'Publicar Video' }}
+                    </button>
+                    <button v-if="editingVideoId" type="button" @click="deleteYoutubeVideoEntry(editingVideoId)" class="btn btn-danger">
+                      <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Eliminar
+                    </button>
+                  </div>
+                </form>
+
+                <!-- === FORM: EXPERTO === -->
+                <form v-if="adminActiveContentForm === 'expert'" @submit.prevent="addNewExpert" class="cms-form-body">
+                  <div class="form-group">
+                    <label>Nombre Completo *</label>
+                    <input type="text" v-model="newExpertForm.name" required placeholder="Dr. Juan Pérez García" />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Especialidad *</label>
+                    <input type="text" v-model="newExpertForm.specialty" required placeholder="Ej: Derecho Laboral & Seguridad Social" />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Experiencia</label>
+                    <input type="text" v-model="newExpertForm.experience" placeholder="Ej: 15 años de experiencia" />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Precio por Consulta (USD) *</label>
+                    <input type="number" v-model.number="newExpertForm.price" required min="0" step="5" placeholder="150" />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>URL Foto de Perfil</label>
+                    <input type="text" v-model="newExpertForm.photo" placeholder="https://images.unsplash.com/..." />
+                    <div v-if="newExpertForm.photo" class="mt-8 text-center">
+                      <img :src="newExpertForm.photo" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--border-color);" />
+                    </div>
+                  </div>
+                  <div class="cms-form-actions">
+                    <button type="submit" class="btn btn-primary">
+                      <i data-lucide="save" style="width:14px;height:14px;"></i> {{ editingExpertId ? 'Guardar Cambios' : 'Registrar Experto' }}
+                    </button>
+                    <button v-if="editingExpertId" type="button" @click="deleteExpertEntry(editingExpertId)" class="btn btn-danger">
+                      <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Eliminar
+                    </button>
+                  </div>
+                </form>
+
+                <!-- === FORM: CURSO === -->
+                <form v-if="adminActiveContentForm === 'course'" @submit.prevent="addNewCourse" class="cms-form-body">
+                  <div class="form-group">
+                    <label>Título del Curso *</label>
+                    <input type="text" v-model="newCourseForm.title" required placeholder="Ej: Cumplimiento en Datos Personales" />
+                  </div>
+                  <div class="form-row mt-12">
+                    <div class="form-group">
+                      <label>Categoría *</label>
+                      <input type="text" v-model="newCourseForm.category" required placeholder="Ej: Derecho Digital" />
+                    </div>
+                    <div class="form-group">
+                      <label>Nivel</label>
+                      <select v-model="newCourseForm.level">
+                        <option value="Básico">Básico</option>
+                        <option value="Intermedio">Intermedio</option>
+                        <option value="Avanzado">Avanzado</option>
+                        <option value="Experto">Experto</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-row mt-12">
+                    <div class="form-group">
+                      <label>Duración</label>
+                      <input type="text" v-model="newCourseForm.duration" placeholder="12 horas" />
+                    </div>
+                    <div class="form-group">
+                      <label>Precio (USD) *</label>
+                      <input type="number" v-model.number="newCourseForm.price" required min="0" step="5" />
+                    </div>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Instructor *</label>
+                    <input type="text" v-model="newCourseForm.instructor" required placeholder="Nombre del instructor" />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Descripción *</label>
+                    <textarea v-model="newCourseForm.description" required rows="3" placeholder="Descripción del curso..."></textarea>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>URL Imagen Portada</label>
+                    <input type="text" v-model="newCourseForm.image" placeholder="https://images.unsplash.com/..." />
+                    <div v-if="newCourseForm.image" class="mt-8">
+                      <img :src="newCourseForm.image" style="width:100%;border-radius:8px;max-height:100px;object-fit:cover;" />
+                    </div>
+                  </div>
+                  <div class="cms-form-actions">
+                    <button type="submit" class="btn btn-primary">
+                      <i data-lucide="save" style="width:14px;height:14px;"></i> {{ editingCourseId ? 'Guardar Cambios' : 'Publicar Curso' }}
+                    </button>
+                    <button v-if="editingCourseId" type="button" @click="deleteCourseEntry(editingCourseId)" class="btn btn-danger">
+                      <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Eliminar
+                    </button>
+                  </div>
+                </form>
+
+                <!-- === FORM: TRIVIA === -->
+                <form v-if="adminActiveContentForm === 'trivia'" @submit.prevent="addNewTrivia" class="cms-form-body">
+                  <div class="form-group">
+                    <label>Tema / Categoría *</label>
+                    <input type="text" v-model="newTriviaForm.theme" required placeholder="Habeas Data, Contratación..." />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Pregunta *</label>
+                    <textarea v-model="newTriviaForm.question" required rows="2" placeholder="¿Cuál es el plazo máximo...?"></textarea>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Opción A *</label><input type="text" v-model="newTriviaForm.option0" required placeholder="Opción A" />
+                  </div>
+                  <div class="form-group mt-8">
+                    <label>Opción B *</label><input type="text" v-model="newTriviaForm.option1" required placeholder="Opción B" />
+                  </div>
+                  <div class="form-group mt-8">
+                    <label>Opción C *</label><input type="text" v-model="newTriviaForm.option2" required placeholder="Opción C" />
+                  </div>
+                  <div class="form-group mt-8">
+                    <label>Opción D *</label><input type="text" v-model="newTriviaForm.option3" required placeholder="Opción D" />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Respuesta Correcta *</label>
+                    <select v-model.number="newTriviaForm.correctIndex" required>
+                      <option :value="0">A — {{ newTriviaForm.option0 }}</option>
+                      <option :value="1">B — {{ newTriviaForm.option1 }}</option>
+                      <option :value="2">C — {{ newTriviaForm.option2 }}</option>
+                      <option :value="3">D — {{ newTriviaForm.option3 }}</option>
+                    </select>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Explicación de la Respuesta</label>
+                    <textarea v-model="newTriviaForm.explanation" rows="2" placeholder="¿Por qué es correcta?"></textarea>
+                  </div>
+                  <div class="cms-form-actions">
+                    <button type="submit" class="btn btn-primary">
+                      <i data-lucide="save" style="width:14px;height:14px;"></i> {{ editingTriviaId ? 'Guardar Cambios' : 'Publicar Pregunta' }}
+                    </button>
+                    <button v-if="editingTriviaId" type="button" @click="deleteTriviaQuestionEntry(editingTriviaId)" class="btn btn-danger">
+                      <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Eliminar
+                    </button>
+                  </div>
+                </form>
+
+              </div>
+            </div>
+          </div>
+
+
+          <!-- ===== SUB-PANEL 3: Logo & Branding ===== -->
+
+
+          <!-- ===== SUB-PANEL 3: Logo & Branding ===== -->
+          <div v-if="adminActivePanel === 'logo'">
+            <div class="grid grid-two-cols gap-24">
+              <div class="admin-panel-card p-24 border rounded">
+                <h3 class="mb-4"><i data-lucide="image" style="display:inline;width:18px;height:18px;vertical-align:middle;margin-right:8px;color:var(--color-accent);"></i>Configuración del Logo</h3>
+                <p class="text-secondary text-sm mb-20">Personaliza el logo y la identidad visual de la plataforma.</p>
+                
+                <div class="form-group">
+                  <label>URL del Logo (imagen externa)</label>
+                  <input type="text" v-model="logoUrl" placeholder="https://miempresa.com/logo.png" />
+                </div>
+                <div class="form-group mt-12">
+                  <label>O Subir Logo desde Archivo</label>
+                  <input type="file" accept="image/*" @change="handleLogoUpload" style="width:100%;padding:6px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);" />
+                </div>
+                <div class="form-group mt-12">
+                  <label>Ancho del Logo: {{ logoWidth }}px</label>
+                  <input type="range" v-model.number="logoWidth" min="60" max="250" step="5" style="width:100%;accent-color:var(--color-accent);" />
+                  <div class="flex justify-between text-xs text-secondary mt-4">
+                    <span>60px (Pequeño)</span>
+                    <span>250px (Grande)</span>
+                  </div>
+                </div>
+                <div class="flex gap-12 mt-20">
+                  <button class="btn btn-primary" @click="saveLogoSettings" style="flex:1;">
+                    <i data-lucide="save" style="width:14px;height:14px;"></i> Guardar Logo
+                  </button>
+                  <button class="btn btn-outline" @click="resetLogoSettings">
+                    <i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i> Restaurar
+                  </button>
+                </div>
+              </div>
+              <!-- Logo Preview -->
+              <div class="admin-panel-card p-24 border rounded">
+                <h3 class="mb-16">Vista Previa del Logo</h3>
+                <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:24px;display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                  <img :src="logoUrl" :style="{ width: logoWidth + 'px', height: 'auto', borderRadius: '4px' }" alt="Logo Preview" style="object-fit:contain;" />
+                  <div>
+                    <div class="logo-title" style="font-size:1.2rem;">LegalCol</div>
+                    <div class="logo-tagline">Biblioteca Inteligente</div>
+                  </div>
+                </div>
+                <div style="background:#1a1a2e;border-radius:var(--radius-md);padding:20px;display:flex;align-items:center;gap:12px;">
+                  <img :src="logoUrl" :style="{ width: (logoWidth * 0.8) + 'px', height: 'auto', borderRadius: '4px' }" alt="Logo Dark Preview" style="object-fit:contain;" />
+                  <div>
+                    <div style="color:#ffffff;font-weight:700;font-size:1rem;">LegalCol</div>
+                    <div style="color:rgba(255,255,255,0.6);font-size:0.75rem;">Fondo oscuro</div>
+                  </div>
+                </div>
+                <p class="text-secondary text-xs mt-12">El logo se mostrará en el header de la plataforma y en documentos PDF.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== SUB-PANEL 4: Home Page Configuration ===== -->
+          <div v-if="adminActivePanel === 'home_config'">
+            <div class="grid grid-two-cols gap-24">
+              <div class="admin-panel-card p-24 border rounded">
+                <h3 class="mb-4"><i data-lucide="layout-template" style="display:inline;width:18px;height:18px;vertical-align:middle;margin-right:8px;color:var(--color-accent);"></i>Textos de la Página de Inicio</h3>
+                <p class="text-secondary text-sm mb-20">Personaliza los textos y estadísticas del Hero de la página principal.</p>
+                
+                <div class="form-group">
+                  <label>Badge / Etiqueta Hero</label>
+                  <input type="text" v-model="homeHeroBadge" placeholder="PREMIUM ECOSYSTEM" />
+                  <small class="text-secondary" style="font-size:0.75rem;margin-top:4px;display:block;">Ej: PREMIUM ECOSYSTEM · NUEVO · DESTACADO</small>
+                </div>
+                <div class="form-group mt-12">
+                  <label>Título Principal Hero (HTML permitido)</label>
+                  <textarea v-model="homeHeroTitle" rows="3" placeholder='Encuentre cualquier norma en &lt;span class="gradient-text"&gt;segundos&lt;/span&gt;'></textarea>
+                  <small class="text-secondary" style="font-size:0.75rem;margin-top:4px;display:block;">Puedes usar &lt;span class="gradient-text"&gt;texto resaltado&lt;/span&gt;</small>
+                </div>
+                <div class="form-group mt-12">
+                  <label>Subtítulo Hero</label>
+                  <textarea v-model="homeHeroSubtitle" rows="3" placeholder="Descripción de la plataforma..."></textarea>
+                </div>
+                
+                <h4 class="mt-20 mb-12" style="font-size:0.95rem;font-weight:600;">Estadísticas del Hero</h4>
+                <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                  <div>
+                    <label style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:4px;">Stat 1 - Valor</label>
+                    <input type="text" v-model="homeStat1Value" placeholder="15K+" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);" />
+                  </div>
+                  <div>
+                    <label style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:4px;">Stat 1 - Etiqueta</label>
+                    <input type="text" v-model="homeStat1Label" placeholder="Documentos" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);" />
+                  </div>
+                  <div></div>
+                  <div>
+                    <label style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:4px;">Stat 2 - Valor</label>
+                    <input type="text" v-model="homeStat2Value" placeholder="99.8%" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);" />
+                  </div>
+                  <div>
+                    <label style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:4px;">Stat 2 - Etiqueta</label>
+                    <input type="text" v-model="homeStat2Label" placeholder="Precisión IA" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);" />
+                  </div>
+                  <div></div>
+                  <div>
+                    <label style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:4px;">Stat 3 - Valor</label>
+                    <input type="text" v-model="homeStat3Value" placeholder="24/7" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);" />
+                  </div>
+                  <div>
+                    <label style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:4px;">Stat 3 - Etiqueta</label>
+                    <input type="text" v-model="homeStat3Label" placeholder="Asesoría Activa" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);" />
+                  </div>
+                </div>
+                
+                <button class="btn btn-primary w-full mt-20" @click="saveHomeSettings">
+                  <i data-lucide="save" style="width:14px;height:14px;"></i> Guardar Configuración de Inicio
+                </button>
+              </div>
+
+              <!-- Home Preview -->
+              <div class="admin-panel-card p-24 border rounded">
+                <h3 class="mb-16">Vista Previa del Hero</h3>
+                <div style="background: linear-gradient(135deg, #0d0d1a 0%, #0a0a1f 100%); border-radius: var(--radius-md); padding: 28px; position: relative; overflow: hidden;">
+                  <div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 50%, rgba(66,133,244,0.15) 0%, transparent 60%);pointer-events:none;"></div>
+                  <div style="position:relative;z-index:1;">
+                    <span style="display:inline-block;background:rgba(66,133,244,0.15);color:#4285f4;border:1px solid rgba(66,133,244,0.3);border-radius:20px;padding:4px 12px;font-size:0.7rem;font-weight:700;letter-spacing:1px;margin-bottom:12px;">{{ homeHeroBadge }}</span>
+                    <h2 v-html="homeHeroTitle" style="font-size:1.4rem;color:#ffffff;font-weight:800;line-height:1.3;margin-bottom:10px;"></h2>
+                    <p style="color:rgba(255,255,255,0.65);font-size:0.8rem;line-height:1.5;margin-bottom:16px;">{{ homeHeroSubtitle.substring(0, 120) }}...</p>
+                    <div style="display:flex;gap:16px;">
+                      <div style="text-align:center;">
+                        <div style="color:#4285f4;font-weight:800;font-size:1.2rem;">{{ homeStat1Value }}</div>
+                        <div style="color:rgba(255,255,255,0.5);font-size:0.7rem;">{{ homeStat1Label }}</div>
+                      </div>
+                      <div style="text-align:center;">
+                        <div style="color:#34a853;font-weight:800;font-size:1.2rem;">{{ homeStat2Value }}</div>
+                        <div style="color:rgba(255,255,255,0.5);font-size:0.7rem;">{{ homeStat2Label }}</div>
+                      </div>
+                      <div style="text-align:center;">
+                        <div style="color:#fbbc04;font-weight:800;font-size:1.2rem;">{{ homeStat3Value }}</div>
+                        <div style="color:rgba(255,255,255,0.5);font-size:0.7rem;">{{ homeStat3Label }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p class="text-secondary text-xs mt-12">Esta es una vista previa simplificada del hero de la página de inicio.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== SUB-PANEL 5: Supabase Database ===== -->
+          <div v-if="adminActivePanel === 'supabase'">
+            <div class="grid grid-two-cols gap-24">
+              <div class="admin-panel-card p-24 border rounded">
+                <h3 class="mb-4"><i data-lucide="database" style="display:inline;width:18px;height:18px;vertical-align:middle;margin-right:8px;color:var(--color-accent);"></i>Conexión a Supabase</h3>
+                <p class="text-secondary text-sm mb-20">Configura la conexión a tu base de datos en Supabase para activar el modo cloud de LegalCol.</p>
+                
+                <div style="padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:16px;display:flex;align-items:center;gap:10px;" :style="isSupabaseConnected ? 'background:rgba(52,168,83,0.1);border:1px solid rgba(52,168,83,0.3);' : 'background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.2);'">
+                  <i :data-lucide="isSupabaseConnected ? 'check-circle' : 'alert-circle'" :style="isSupabaseConnected ? 'color:var(--color-success);width:18px;height:18px;' : 'color:var(--color-danger);width:18px;height:18px;'"></i>
+                  <span :style="isSupabaseConnected ? 'color:var(--color-success);font-weight:600;' : 'color:var(--color-danger);font-weight:600;'">
+                    {{ isSupabaseConnected ? 'Conectado a Supabase' : 'Sin conexión a Supabase (modo local)' }}
+                  </span>
+                </div>
+
+                <div class="form-group">
+                  <label>URL del Proyecto Supabase</label>
+                  <input type="text" v-model="supabaseUrl" placeholder="https://abcxyz.supabase.co" />
+                </div>
+                <div class="form-group mt-12">
+                  <label>Clave Anon / Public Key</label>
+                  <input type="password" v-model="supabaseKey" placeholder="eyJhbGci..." />
+                </div>
+                <div class="flex gap-12 mt-16">
+                  <button class="btn btn-primary" @click="saveAndTestSupabase" style="flex:1;" :disabled="isTestingConnection">
+                    <i data-lucide="plug" style="width:14px;height:14px;"></i>
+                    {{ isTestingConnection ? 'Probando...' : 'Guardar y Conectar' }}
+                  </button>
+                </div>
+                
+                <div class="mt-24" style="border-top:1px solid var(--border-color);padding-top:20px;">
+                  <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:12px;">Sincronización de Datos</h4>
+                  <p class="text-secondary text-sm mb-12">Exporta todos los datos locales a tu base de datos Supabase.</p>
+                  <button class="btn btn-outline w-full" @click="syncAllToSupabase" :disabled="!isSupabaseConnected || isSyncingDb">
+                    <i data-lucide="upload-cloud" style="width:14px;height:14px;"></i>
+                    {{ isSyncingDb ? 'Sincronizando...' : 'Sincronizar Todo a Supabase' }}
+                  </button>
+                  <p v-if="!isSupabaseConnected" class="text-secondary text-xs mt-8 text-center">Debes estar conectado para sincronizar datos.</p>
+                </div>
+              </div>
+
+              <!-- Supabase Info Card -->
+              <div class="admin-panel-card p-24 border rounded">
+                <h3 class="mb-16">Guía de Configuración</h3>
+                <div style="display:flex;flex-direction:column;gap:16px;">
+                  <div style="display:flex;gap:12px;align-items:flex-start;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:var(--color-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;">1</div>
+                    <div>
+                      <p style="font-weight:600;font-size:0.9rem;margin-bottom:4px;">Crear proyecto en Supabase</p>
+                      <p class="text-secondary text-sm">Visita supabase.com → New Project y crea tu proyecto de base de datos.</p>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:12px;align-items:flex-start;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:var(--color-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;">2</div>
+                    <div>
+                      <p style="font-weight:600;font-size:0.9rem;margin-bottom:4px;">Ejecutar el esquema SQL</p>
+                      <p class="text-secondary text-sm">Copia el contenido de <code style="background:var(--bg-secondary);padding:1px 6px;border-radius:3px;font-size:0.8rem;">schema.sql</code> y ejecútalo en el SQL Editor de Supabase.</p>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:12px;align-items:flex-start;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:var(--color-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;">3</div>
+                    <div>
+                      <p style="font-weight:600;font-size:0.9rem;margin-bottom:4px;">Copiar credenciales</p>
+                      <p class="text-secondary text-sm">En Settings → API, copia la URL del proyecto y la clave anon/public.</p>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:12px;align-items:flex-start;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:var(--color-success);color:white;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;">4</div>
+                    <div>
+                      <p style="font-weight:600;font-size:0.9rem;margin-bottom:4px;">Pega aquí y conecta</p>
+                      <p class="text-secondary text-sm">Ingresa las credenciales en el formulario y haz clic en "Guardar y Conectar".</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style="margin-top:20px;padding:12px 16px;background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2);border-radius:var(--radius-sm);">
+                  <p class="text-xs" style="color:var(--color-accent);font-weight:600;margin-bottom:4px;"><i data-lucide="info" style="width:12px;height:12px;display:inline;vertical-align:middle;"></i> Modo Local Activo</p>
+                  <p class="text-secondary text-xs">Sin conexión, todos los datos se guardan en memoria y se pierden al recargar. Conecta Supabase para persistencia completa.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -1424,54 +2088,59 @@
 
     <!-- AUTHENTICATION DIALOG / MODAL (SUPABASE SIGNIN & REGISTER) -->
     <div v-if="showAuthModal" class="visor-backdrop" @click.self="showAuthModal = false">
-      <div class="visor-container animate-slide-up" style="max-width: 420px; border-radius: var(--radius-lg); background-color: var(--bg-primary); padding: 32px; box-shadow: var(--shadow-premium);">
-        <div class="visor-header pb-12 border-bottom flex justify-between align-center">
-          <h3>{{ authTab === 'login' ? 'Iniciar Sesión' : 'Registrarse en LegalCol' }}</h3>
-          <button class="close-visor" @click="showAuthModal = false" style="background: none; border: none; cursor: pointer;">
-            <i data-lucide="x"></i>
+      <div class="auth-modal-card animate-slide-up">
+        <!-- Modal Header con logo -->
+        <div class="auth-modal-header">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <span style="font-size:1.5rem;font-weight:800;letter-spacing:-0.04em;color:var(--text-primary);">LegalCol</span>
+            <span style="background:var(--color-accent);color:white;font-size:0.6rem;font-weight:700;padding:2px 6px;border-radius:999px;letter-spacing:0.04em;">PRO</span>
+          </div>
+          <p style="color:var(--text-secondary);font-size:0.85rem;">{{ authTab === 'login' ? 'Bienvenido de vuelta' : 'Crea tu cuenta gratuita' }}</p>
+          <button @click="showAuthModal = false" style="position:absolute;top:20px;right:20px;background:none;border:none;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:background 0.2s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'">
+            <i data-lucide="x" style="width:16px;height:16px;"></i>
           </button>
         </div>
 
-        <form @submit.prevent="handleAuthSubmit" class="mt-20">
-          <div class="form-group" v-if="authTab === 'register'">
-            <label class="text-xs uppercase font-bold text-muted block mb-4">Nombre Completo</label>
-            <input type="text" v-model="authFullName" required placeholder="Tu nombre" class="w-full" style="width: 100%;" />
+        <!-- Tabs -->
+        <div style="display:flex;background:var(--bg-tertiary);border-radius:8px;padding:3px;margin-bottom:24px;">
+          <button type="button" @click="authTab = 'login'" :style="authTab==='login' ? 'flex:1;padding:8px;border:none;border-radius:6px;background:white;font-weight:600;font-size:0.85rem;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1);color:var(--text-primary);' : 'flex:1;padding:8px;border:none;background:none;font-size:0.85rem;cursor:pointer;color:var(--text-secondary);'">Ingresar</button>
+          <button type="button" @click="authTab = 'register'" :style="authTab==='register' ? 'flex:1;padding:8px;border:none;border-radius:6px;background:white;font-weight:600;font-size:0.85rem;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1);color:var(--text-primary);' : 'flex:1;padding:8px;border:none;background:none;font-size:0.85rem;cursor:pointer;color:var(--text-secondary);'">Registrarse</button>
+        </div>
+
+        <form @submit.prevent="handleAuthSubmit">
+          <div v-if="authTab === 'register'" class="auth-field">
+            <label>Nombre Completo</label>
+            <input type="text" v-model="authFullName" required placeholder="Ej: Ana López Vargas" />
           </div>
 
-          <div class="form-group mt-12">
-            <label class="text-xs uppercase font-bold text-muted block mb-4">Correo Electrónico</label>
-            <input type="email" v-model="authEmail" required placeholder="correo@empresa.com" class="w-full" style="width: 100%;" />
+          <div class="auth-field" :style="authTab==='register' ? 'margin-top:12px;' : ''">
+            <label>Correo Electrónico</label>
+            <input type="email" v-model="authEmail" required placeholder="correo@empresa.com" />
           </div>
 
-          <div class="form-group mt-12">
-            <label class="text-xs uppercase font-bold text-muted block mb-4">Contraseña</label>
-            <input type="password" v-model="authPassword" required placeholder="Mínimo 6 caracteres" class="w-full" style="width: 100%;" />
+          <div class="auth-field" style="margin-top:12px;">
+            <label>Contraseña</label>
+            <input type="password" v-model="authPassword" required placeholder="Mínimo 6 caracteres" />
           </div>
 
-          <div class="form-group mt-12" v-if="authTab === 'register'">
-            <label class="text-xs uppercase font-bold text-muted block mb-4">Rol en la Plataforma</label>
-            <select v-model="authRoleSelection" required class="w-full" style="width: 100%; padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-              <option value="user">Usuario (Lectura y Consultas)</option>
-              <option value="expert">Experto Legal (Asesorías y Cursos)</option>
-              <option value="admin">Administrador (Gestor de Contenidos)</option>
+          <div v-if="authTab === 'register'" class="auth-field" style="margin-top:12px;">
+            <label>Perfil de Acceso</label>
+            <select v-model="authRoleSelection" required>
+              <option value="user">👤 Usuario — Lectura y Consultas</option>
+              <option value="expert">⚖️ Experto Legal — Asesorías y Cursos</option>
+              <option value="admin">🛠️ Administrador — Gestor de Contenidos</option>
             </select>
           </div>
 
-          <button type="submit" class="btn btn-primary w-full mt-24" :disabled="isAuthLoading">
-            <span v-if="isAuthLoading">Procesando...</span>
-            <span v-else>{{ authTab === 'login' ? 'Ingresar' : 'Crear Cuenta' }}</span>
+          <button type="submit" :disabled="isAuthLoading" style="width:100%;margin-top:20px;padding:13px;border:none;border-radius:10px;background:var(--color-accent);color:white;font-size:0.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.2s;" :style="isAuthLoading ? 'opacity:0.7;cursor:not-allowed;' : 'opacity:1;'">
+            <svg v-if="isAuthLoading" style="width:16px;height:16px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>
+            {{ isAuthLoading ? 'Procesando...' : (authTab === 'login' ? 'Ingresar' : 'Crear Cuenta') }}
           </button>
         </form>
 
-        <div class="mt-20 text-center text-sm text-secondary">
-          <span v-if="authTab === 'login'">
-            ¿No tienes cuenta? 
-            <a href="#" @click.prevent="authTab = 'register'" style="color: var(--color-accent); font-weight: bold;">Regístrate aquí</a>
-          </span>
-          <span v-else>
-            ¿Ya tienes cuenta? 
-            <a href="#" @click.prevent="authTab = 'login'" style="color: var(--color-accent); font-weight: bold;">Inicia sesión</a>
-          </span>
+        <!-- Hint demo admin -->
+        <div v-if="authTab === 'login' && !isSupabaseConnected" style="margin-top:16px;padding:10px 14px;background:var(--bg-secondary);border-radius:8px;border:1px solid var(--border-color);">
+          <p style="font-size:0.75rem;color:var(--text-secondary);margin:0;"><strong style="color:var(--text-primary);">Modo Demo:</strong> Usa <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px;">admin@legalcol.com</code> / <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px;">AdminLegalCol2026!</code></p>
         </div>
       </div>
     </div>
@@ -1766,6 +2435,14 @@ export default {
       adminActivePanel: 'kpi', // 'kpi' | 'supabase' | 'content_crud'
       adminActiveContentForm: 'norm',
       
+      // Editing State
+      editingNormId: '',
+      editingVideoId: '',
+      editingExpertId: '',
+      editingCourseId: '',
+      editingTriviaId: '',
+      // CMS Module state
+      cmsSearch: '',
       // Favorites list
       favorites: [],
 
@@ -1967,6 +2644,60 @@ export default {
       });
     },
 
+    loadNormToEdit() {
+      if (!this.editingNormId) {
+        this.newNormForm = { title: '', type: 'Ley', fullName: '', summary: '', content: '', sector: 'Tecnología', entity: 'Congreso', keywords: '', relatedVideoId: '' };
+        return;
+      }
+      const norm = this.normsData.find(n => n.id === this.editingNormId);
+      if (norm) {
+        this.newNormForm = { ...norm, keywords: norm.keywords ? norm.keywords.join(', ') : '' };
+      }
+    },
+    loadVideoToEdit() {
+      if (!this.editingVideoId) {
+        this.newVideoForm = { id: '', title: '', description: '', duration: '', views: '', embedUrl: '', category: 'Educativo', thumbnail: '' };
+        return;
+      }
+      const video = this.youtubeVideosData.find(v => v.id === this.editingVideoId);
+      if (video) this.newVideoForm = { ...video };
+    },
+    loadExpertToEdit() {
+      if (!this.editingExpertId) {
+        this.newExpertForm = { name: '', photo: '', specialty: '', experience: '', certifications: '', successCases: '', publications: '', videoUrl: '', price: '', rating: 5.0, reviews: 0 };
+        return;
+      }
+      const expert = this.expertsData.find(e => e.id === this.editingExpertId);
+      if (expert) this.newExpertForm = { ...expert, certifications: expert.certifications ? expert.certifications.join(', ') : '', publications: expert.publications ? expert.publications.join(', ') : '' };
+    },
+    loadCourseToEdit() {
+      if (!this.editingCourseId) {
+        this.newCourseForm = { title: '', category: '', duration: '', level: 'Básico', instructor: '', price: '', description: '', modulesCount: 4, badge: '', image: '' };
+        return;
+      }
+      const course = this.coursesData.find(c => c.id === this.editingCourseId);
+      if (course) this.newCourseForm = { ...course };
+    },
+    loadTriviaToEdit() {
+      if (!this.editingTriviaId) {
+        this.newTriviaForm = { theme: '', question: '', option0: '', option1: '', option2: '', option3: '', correctIndex: 0, explanation: '' };
+        return;
+      }
+      const trivia = this.triviaData.find(t => t.id === this.editingTriviaId);
+      if (trivia) {
+        this.newTriviaForm = {
+          theme: trivia.theme,
+          question: trivia.question,
+          option0: trivia.options[0] || '',
+          option1: trivia.options[1] || '',
+          option2: trivia.options[2] || '',
+          option3: trivia.options[3] || '',
+          correctIndex: trivia.correctIndex,
+          explanation: trivia.explanation
+        };
+      }
+    },
+
     async saveLogoSettings() {
       localStorage.setItem('legalcol_logo_url', this.logoUrl);
       localStorage.setItem('legalcol_logo_width', this.logoWidth.toString());
@@ -2067,12 +2798,34 @@ export default {
     async handleRegister() {
       this.isAuthLoading = true;
       try {
+        // Si no hay Supabase conectado, registrar localmente
+        if (!this.isSupabaseConnected) {
+          throw new Error('Supabase offline — usando registro local');
+        }
         await signUpUser(this.authEmail, this.authPassword, this.authFullName, this.authRoleSelection);
-        alert('Usuario registrado con éxito. Revisa tu correo de confirmación de Supabase (si aplica) e inicia sesión.');
-        this.authTab = 'login';
+        // Automáticamente iniciar sesión después del registro exitoso
+        await signInUser(this.authEmail, this.authPassword);
+        await this.checkUserSession();
+        this.showAuthModal = false;
+        this.authEmail = '';
+        this.authPassword = '';
+        this.authFullName = '';
       } catch (e) {
-        console.error(e);
-        alert('Error al registrar: ' + e.message);
+        // Fallback: registrar y loguear localmente en modo demo
+        if (!this.isSupabaseConnected || e.message.includes('offline') || e.message.includes('registro local')) {
+          this.currentUserSession = {
+            auth: { id: 'local-' + Date.now(), email: this.authEmail, user_metadata: { role: this.authRoleSelection, full_name: this.authFullName || this.authEmail } },
+            profile: { id: 'local-' + Date.now(), email: this.authEmail, full_name: this.authFullName || this.authEmail, role: this.authRoleSelection }
+          };
+          this.currentUserRole = this.authRoleSelection;
+          this.showAuthModal = false;
+          this.authEmail = '';
+          this.authPassword = '';
+          this.authFullName = '';
+        } else {
+          console.error(e);
+          alert('Error al registrar: ' + e.message);
+        }
       } finally {
         this.isAuthLoading = false;
       }
@@ -2081,30 +2834,32 @@ export default {
     async handleLogin() {
       this.isAuthLoading = true;
       try {
+        // Shortcut local para admin sin Supabase
+        if (!this.isSupabaseConnected && this.authEmail === 'admin@legalcol.com' && this.authPassword === 'AdminLegalCol2026!') {
+          throw new Error('shortcut-local-admin');
+        }
+
         await signInUser(this.authEmail, this.authPassword);
         await this.checkUserSession();
-        alert(`Sesión iniciada con éxito. Bienvenido, ${this.currentUserSession.profile.full_name}!`);
         this.showAuthModal = false;
         this.authEmail = '';
         this.authPassword = '';
         this.authFullName = '';
       } catch (e) {
-        console.error(e);
-        // Fallback robusto para desarrollo local y evitar bloqueos por confirmación de email o límites de supabase
+        // Fallback admin local
         if (this.authEmail === 'admin@legalcol.com' && this.authPassword === 'AdminLegalCol2026!') {
-          console.warn('Iniciando sesión con el administrador local por defecto (Supabase offline o confirmación pendiente)');
           this.currentUserSession = {
             auth: { id: 'mock-admin-id', email: 'admin@legalcol.com', user_metadata: { role: 'admin', full_name: 'Administrador Local (Demo)' } },
             profile: { id: 'mock-admin-id', email: 'admin@legalcol.com', full_name: 'Administrador Local (Demo)', role: 'admin' }
           };
           this.currentUserRole = 'admin';
-          alert('Sesión iniciada con éxito como Administrador Local (Modo Fallback/Demostración).');
           this.showAuthModal = false;
           this.authEmail = '';
           this.authPassword = '';
           this.authFullName = '';
         } else {
-          alert('Error al iniciar sesión: ' + e.message);
+          console.error(e);
+          alert('Credenciales incorrectas. Por favor verifica tu correo y contraseña.');
         }
       } finally {
         this.isAuthLoading = false;
@@ -2125,58 +2880,58 @@ export default {
 
     // Dynamic Deletions (CRUD for Admins)
     async deleteNormEntry(id) {
-      if (!confirm('¿Está seguro de eliminar esta norma de forma permanente?')) return;
-      try {
-        await deleteNorm(id);
-        alert('Norma eliminada con éxito.');
-        await this.loadAllData();
-      } catch (e) {
-        alert('Error al eliminar norma: ' + e.message);
+      if (!id || !confirm('¿Eliminar esta normativa permanentemente?')) return;
+      if (this.isSupabaseConnected) {
+        try { await deleteNorm(id); await this.loadAllData(); }
+        catch (e) { alert('Error: ' + e.message); }
+      } else {
+        this.normsData = this.normsData.filter(n => n.id !== id);
       }
+      this.clearCmsForm();
     },
 
     async deleteExpertEntry(id) {
-      if (!confirm('¿Está seguro de eliminar este experto de forma permanente?')) return;
-      try {
-        await deleteExpert(id);
-        alert('Experto eliminado con éxito.');
-        await this.loadAllData();
-      } catch (e) {
-        alert('Error al eliminar experto: ' + e.message);
+      if (!id || !confirm('¿Eliminar este experto permanentemente?')) return;
+      if (this.isSupabaseConnected) {
+        try { await deleteExpert(id); await this.loadAllData(); }
+        catch (e) { alert('Error: ' + e.message); }
+      } else {
+        this.expertsData = this.expertsData.filter(e => e.id !== id);
       }
+      this.clearCmsForm();
     },
 
     async deleteCourseEntry(id) {
-      if (!confirm('¿Está seguro de eliminar este curso de forma permanente?')) return;
-      try {
-        await deleteCourse(id);
-        alert('Curso eliminado con éxito.');
-        await this.loadAllData();
-      } catch (e) {
-        alert('Error al eliminar curso: ' + e.message);
+      if (!id || !confirm('¿Eliminar este curso permanentemente?')) return;
+      if (this.isSupabaseConnected) {
+        try { await deleteCourse(id); await this.loadAllData(); }
+        catch (e) { alert('Error: ' + e.message); }
+      } else {
+        this.coursesData = this.coursesData.filter(c => c.id !== id);
       }
+      this.clearCmsForm();
     },
 
     async deleteTriviaQuestionEntry(id) {
-      if (!confirm('¿Está seguro de eliminar esta pregunta de trivia de forma permanente?')) return;
-      try {
-        await deleteTriviaQuestion(id);
-        alert('Pregunta de trivia eliminada con éxito.');
-        await this.loadAllData();
-      } catch (e) {
-        alert('Error al eliminar pregunta: ' + e.message);
+      if (!id || !confirm('¿Eliminar esta pregunta de trivia permanentemente?')) return;
+      if (this.isSupabaseConnected) {
+        try { await deleteTriviaQuestion(id); await this.loadAllData(); }
+        catch (e) { alert('Error: ' + e.message); }
+      } else {
+        this.triviaData = this.triviaData.filter(q => q.id !== id);
       }
+      this.clearCmsForm();
     },
 
     async deleteYoutubeVideoEntry(id) {
-      if (!confirm('¿Está seguro de eliminar este video de forma permanente?')) return;
-      try {
-        await deleteYoutubeVideo(id);
-        alert('Video eliminado con éxito.');
-        await this.loadAllData();
-      } catch (e) {
-        alert('Error al eliminar video: ' + e.message);
+      if (!id || !confirm('¿Eliminar este video permanentemente?')) return;
+      if (this.isSupabaseConnected) {
+        try { await deleteYoutubeVideo(id); await this.loadAllData(); }
+        catch (e) { alert('Error: ' + e.message); }
+      } else {
+        this.youtubeVideosData = this.youtubeVideosData.filter(v => v.id !== id);
       }
+      this.clearCmsForm();
     },
 
     async loadAllData() {
@@ -2632,7 +3387,7 @@ export default {
 
     // Admin Panel Actions
     async addNewNorm() {
-      const id = this.newNormForm.title.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
+      const id = this.editingNormId ? this.editingNormId : this.newNormForm.title.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
       const keywordsArray = this.newNormForm.keywords ? this.newNormForm.keywords.split(',').map(k => k.trim()) : ["Norma", "Regulación"];
       const mockNorm = {
         id,
@@ -2659,24 +3414,31 @@ export default {
       if (this.isSupabaseConnected) {
         try {
           await insertNorms([mockNorm]);
-          alert(`Normativa registrada de forma persistente en la Base de Datos.`);
+          alert(this.editingNormId ? `Normativa actualizada de forma persistente.` : `Normativa registrada de forma persistente en la Base de Datos.`);
         } catch (e) {
           console.error(e);
           alert(`Error al guardar en base de datos: ` + e.message);
         }
       } else {
-        this.normsData.unshift(mockNorm);
-        alert(`Normativa registrada temporalmente en memoria (modo local).`);
+        if (this.editingNormId) {
+          const idx = this.normsData.findIndex(n => n.id === this.editingNormId);
+          if (idx !== -1) this.normsData.splice(idx, 1, mockNorm);
+          alert(`Normativa actualizada temporalmente en memoria.`);
+        } else {
+          this.normsData.unshift(mockNorm);
+          alert(`Normativa registrada temporalmente en memoria (modo local).`);
+        }
       }
       
       await this.loadAllData();
+      this.editingNormId = '';
       this.newNormForm = { title: '', type: 'Ley', fullName: '', summary: '', content: '', sector: 'Tecnología', entity: 'Congreso', keywords: '', relatedVideoId: '' };
       this.currentTab = 'library';
     },
 
     async addNewExpert() {
       const mockExpert = {
-        id: this.newExpertForm.id.toLowerCase().replace(/ /g, '-'),
+        id: this.editingExpertId ? this.editingExpertId : this.newExpertForm.id.toLowerCase().replace(/ /g, '-'),
         name: this.newExpertForm.name,
         photo: this.newExpertForm.photo,
         specialty: this.newExpertForm.specialty,
@@ -2693,16 +3455,23 @@ export default {
       if (this.isSupabaseConnected) {
         try {
           await insertExperts([mockExpert]);
-          alert('Experto registrado de forma persistente en la Base de Datos.');
+          alert(this.editingExpertId ? 'Experto actualizado en la Base de Datos.' : 'Experto registrado de forma persistente en la Base de Datos.');
         } catch (e) {
           console.error(e);
           alert('Error al guardar experto: ' + e.message);
         }
       } else {
-        this.expertsData.unshift(mockExpert);
-        alert('Experto registrado temporalmente en memoria.');
+        if (this.editingExpertId) {
+          const idx = this.expertsData.findIndex(e => e.id === this.editingExpertId);
+          if (idx !== -1) this.expertsData.splice(idx, 1, mockExpert);
+          alert('Experto actualizado temporalmente en memoria.');
+        } else {
+          this.expertsData.unshift(mockExpert);
+          alert('Experto registrado temporalmente en memoria.');
+        }
       }
       await this.loadAllData();
+      this.editingExpertId = '';
       this.newExpertForm = { id: '', name: '', photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=256&auto=format&fit=crop', specialty: '', experience: '', price: 100 };
       this.currentTab = 'marketplace';
     },
@@ -2732,62 +3501,93 @@ export default {
         }
       } else {
         this.coursesData.unshift(mockCourse);
-        alert('Curso registrado temporalmente en memoria.');
+        alert('Curso registrado en memoria.');
       }
-      await this.loadAllData();
       this.newCourseForm = { id: '', title: '', category: '', duration: '', level: 'Básico', instructor: '', price: 150, description: '', image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=400&auto=format&fit=crop' };
       this.currentTab = 'academy';
     },
-
     async addNewVideo() {
-      let rawId = this.newVideoForm.id.trim();
-      let extractedId = rawId;
+      let extractedId = '';
+      let urlInput = this.newVideoForm.id ? this.newVideoForm.id.trim() : '';
+      let embedInput = this.newVideoForm.embedUrl ? this.newVideoForm.embedUrl.trim() : '';
 
-      // Regular expressions to extract YouTube ID from different format URLs
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = rawId.match(regExp);
+      // 1. Intentar obtener el ID del campo URL/ID
+      if (urlInput) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = urlInput.match(regExp);
+        if (match && match[2].length === 11) {
+          extractedId = match[2];
+        } else if (urlInput.includes('youtube.com/shorts/')) {
+          const parts = urlInput.split('youtube.com/shorts/');
+          if (parts[1]) extractedId = parts[1].split(/[?#&]/)[0];
+        } else if (urlInput.length === 11) {
+          extractedId = urlInput;
+        }
+      }
 
-      if (match && match[2].length === 11) {
-        extractedId = match[2];
-      } else {
-        // Fallback for clean 11-character IDs or other formats
-        if (rawId.includes('youtube.com/shorts/')) {
-          const parts = rawId.split('youtube.com/shorts/');
-          if (parts[1]) {
-            extractedId = parts[1].split(/[?#&]/)[0];
+      // 2. Si no se pudo y hay URL de Embed, intentar extraer de ahí
+      if (!extractedId && embedInput) {
+        const regExpEmbed = /^.*(embed\/|watch\?v=)([^#\&\?]*).*/;
+        const matchEmbed = embedInput.match(regExpEmbed);
+        if (matchEmbed && matchEmbed[2].length === 11) {
+          extractedId = matchEmbed[2];
+        } else {
+          // fallback buscar cualquier secuencia de 11 caracteres al final de la URL
+          const parts = embedInput.split('/');
+          const lastPart = parts[parts.length - 1];
+          if (lastPart && lastPart.length === 11) {
+            extractedId = lastPart;
           }
         }
       }
 
+      // 3. Si sigue sin ID, usar fallback temporal
+      if (!extractedId) {
+        extractedId = 'dQw4w9WgXcQ';
+      }
+
+      // 4. Formatear adecuadamente
+      const finalEmbedUrl = `https://www.youtube.com/embed/${extractedId}`;
+      const finalThumbnail = `https://img.youtube.com/vi/${extractedId}/hqdefault.jpg`;
+      const idToUse = this.editingVideoId ? this.editingVideoId : extractedId;
+
       const mockVideo = {
-        id: extractedId,
+        id: idToUse,
         title: this.newVideoForm.title,
         description: this.newVideoForm.description,
-        duration: this.newVideoForm.duration,
+        duration: this.newVideoForm.duration || '10:00',
         views: this.newVideoForm.views || '100',
-        embedUrl: `https://www.youtube.com/embed/${extractedId}`,
-        category: this.newVideoForm.category,
-        thumbnail: this.newVideoForm.thumbnail || `https://img.youtube.com/vi/${extractedId}/hqdefault.jpg`
+        embedUrl: finalEmbedUrl,
+        category: this.newVideoForm.category || 'Educativo',
+        thumbnail: finalThumbnail
       };
 
       if (this.isSupabaseConnected) {
         try {
           await insertYoutubeVideos([mockVideo]);
-          alert('Video registrado de forma persistente en la Base de Datos.');
+          alert(this.editingVideoId ? 'Video actualizado en la Base de Datos.' : 'Video registrado en la Base de Datos.');
+          await this.loadAllData();
         } catch (e) {
           console.error(e);
           alert('Error al guardar video: ' + e.message);
         }
       } else {
-        this.youtubeVideosData.unshift(mockVideo);
-        alert('Video registrado temporalmente en memoria.');
+        if (this.editingVideoId) {
+          const idx = this.youtubeVideosData.findIndex(v => v.id === this.editingVideoId);
+          if (idx !== -1) this.youtubeVideosData.splice(idx, 1, mockVideo);
+          alert('Video actualizado temporalmente en memoria.');
+        } else {
+          this.youtubeVideosData.unshift(mockVideo);
+          alert('Video registrado temporalmente en memoria.');
+        }
       }
-      await this.loadAllData();
-      this.newVideoForm = { id: '', title: '', description: '', duration: '10:00', views: '1K', embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', category: 'Educativo', thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=400&auto=format&fit=crop' };
+      this.editingVideoId = '';
+      this.newVideoForm = { id: '', title: '', description: '', duration: '10:00', views: '1K', embedUrl: '', category: 'Educativo', thumbnail: '' };
       this.currentTab = 'youtube';
     },
 
     editNormEntry(norm) {
+      this.editingNormId = norm.id;
       this.newNormForm = {
         title: norm.title,
         type: norm.type,
@@ -2800,11 +3600,14 @@ export default {
         relatedVideoId: norm.relatedVideoId || ''
       };
       this.adminActiveContentForm = 'norm';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`Los datos de la norma "${norm.title}" han sido cargados en el formulario de arriba para que puedas editarlos. Al guardar se actualizará en la base de datos.`);
+      this.$nextTick(() => {
+        const el = document.querySelector('.admin-panel-card');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
     },
 
     editExpertEntry(expert) {
+      this.editingExpertId = expert.id;
       this.newExpertForm = {
         id: expert.id,
         name: expert.name,
@@ -2814,11 +3617,14 @@ export default {
         price: expert.price
       };
       this.adminActiveContentForm = 'expert';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`Los datos del experto "${expert.name}" han sido cargados en el formulario de arriba para que puedas editarlos.`);
+      this.$nextTick(() => {
+        const el = document.querySelector('.admin-panel-card');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
     },
 
     editCourseEntry(course) {
+      this.editingCourseId = course.id;
       this.newCourseForm = {
         id: course.id,
         title: course.title,
@@ -2831,11 +3637,14 @@ export default {
         image: course.image
       };
       this.adminActiveContentForm = 'course';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`Los datos del curso "${course.title}" han sido cargados en el formulario de arriba para que puedas editarlos.`);
+      this.$nextTick(() => {
+        const el = document.querySelector('.admin-panel-card');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
     },
 
     editVideoEntry(video) {
+      this.editingVideoId = video.id;
       this.newVideoForm = {
         id: video.id,
         title: video.title,
@@ -2847,8 +3656,39 @@ export default {
         thumbnail: video.thumbnail
       };
       this.adminActiveContentForm = 'video';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`Los datos del video "${video.title}" han sido cargados en el formulario de arriba para que puedas editarlos.`);
+      this.$nextTick(() => {
+        const el = document.querySelector('.admin-panel-card');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    },
+
+    editTriviaEntry(q) {
+      this.editingTriviaId = q.id || q;
+      this.newTriviaForm = {
+        theme: q.theme,
+        question: q.question,
+        option0: q.options?.[0] || '',
+        option1: q.options?.[1] || '',
+        option2: q.options?.[2] || '',
+        option3: q.options?.[3] || '',
+        correctIndex: q.correctIndex ?? 0,
+        explanation: q.explanation || ''
+      };
+      this.adminActiveContentForm = 'trivia';
+    },
+
+    clearCmsForm() {
+      this.editingNormId = '';
+      this.editingVideoId = '';
+      this.editingExpertId = '';
+      this.editingCourseId = '';
+      this.editingTriviaId = '';
+      // Reset forms
+      this.newNormForm = { title: '', type: 'Ley', fullName: '', summary: '', content: '', sector: 'Tecnología', entity: 'Congreso', keywords: '', relatedVideoId: '', pdfUrl: '' };
+      this.newVideoForm = { id: '', title: '', description: '', duration: '10:00', views: '1K', embedUrl: '', category: 'Educativo', thumbnail: '' };
+      this.newExpertForm = { id: '', name: '', photo: '', specialty: '', experience: '', price: 100 };
+      this.newCourseForm = { id: '', title: '', category: '', duration: '', level: 'Intermedio', instructor: '', price: 0, description: '', image: '' };
+      this.newTriviaForm = { theme: '', question: '', option0: '', option1: '', option2: '', option3: '', correctIndex: 0, explanation: '' };
     },
 
     async addNewTrivia() {
@@ -3519,6 +4359,60 @@ CSS Styles for Biblioteca Inteligente App
 @keyframes slideUp {
   from { transform: translateY(40px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Auth Modal Premium */
+.auth-modal-card {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(226, 232, 240, 0.8);
+  width: 100%;
+  max-width: 400px;
+  padding: 28px;
+  position: relative;
+}
+
+.auth-modal-header {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.auth-field input,
+.auth-field select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-field input:focus,
+.auth-field select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  background: white;
 }
 
 .visor-header {
@@ -4655,7 +5549,442 @@ CSS Styles for Biblioteca Inteligente App
   font-weight: bold;
 }
 
-/* FLOATING CONSULTANCY MODULE */
+/* Admin Panel Sub-Navigation */
+.admin-subnav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px;
+}
+
+.admin-subnav-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-sans);
+}
+
+.admin-subnav-btn i {
+  width: 16px;
+  height: 16px;
+}
+
+.admin-subnav-btn:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.admin-subnav-btn.active {
+  background: var(--color-accent);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(66,133,244,0.3);
+}
+
+/* ===== CMS MODULE STYLES ===== */
+.cms-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cms-type-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cms-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: var(--font-sans);
+}
+
+.cms-pill i { width: 13px; height: 13px; }
+
+.cms-pill:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--color-accent);
+}
+
+.cms-pill.active {
+  background: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+}
+
+.cms-pill-count {
+  background: rgba(255,255,255,0.25);
+  color: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.cms-pill:not(.active) .cms-pill-count {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+.cms-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .cms-layout { grid-template-columns: 1fr; }
+}
+
+.cms-table-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.cms-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.cms-search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  padding: 7px 12px;
+}
+
+.cms-search-box input {
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  width: 100%;
+  font-family: var(--font-sans);
+}
+
+.cms-table-wrap {
+  overflow-x: auto;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.cms-table-wrap::-webkit-scrollbar { width: 4px; height: 4px; }
+.cms-table-wrap::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+.cms-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+}
+
+.cms-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-secondary);
+  z-index: 1;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cms-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.15s;
+}
+
+.cms-table tbody tr:hover { background: var(--bg-secondary); }
+
+.cms-table tbody tr.cms-row-active {
+  background: rgba(37, 99, 235, 0.06);
+  border-left: 3px solid var(--color-accent);
+}
+
+.cms-table td {
+  padding: 10px 12px;
+  vertical-align: middle;
+}
+
+.cms-cell-primary {
+  font-weight: 600;
+  color: var(--text-primary);
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cms-cell-secondary {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.cms-actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.cms-btn-edit, .cms-btn-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cms-btn-edit {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--color-accent);
+}
+
+.cms-btn-edit:hover {
+  background: var(--color-accent);
+  color: white;
+}
+
+.cms-btn-delete {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+
+.cms-btn-delete:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.cms-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.cms-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cms-badge-blue { background: rgba(37,99,235,0.1); color: #2563eb; }
+.cms-badge-red { background: rgba(239,68,68,0.1); color: #ef4444; }
+.cms-badge-green { background: rgba(34,197,94,0.1); color: #16a34a; }
+.cms-badge-amber { background: rgba(245,158,11,0.1); color: #d97706; }
+
+/* CMS Form Panel */
+.cms-form-panel {
+  padding: 0;
+  overflow: hidden;
+  position: sticky;
+  top: 80px;
+}
+
+.cms-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.cms-form-body {
+  padding: 20px;
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.cms-form-body::-webkit-scrollbar { width: 4px; }
+.cms-form-body::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+.cms-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.btn-danger {
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
+  border: 1.5px solid rgba(239,68,68,0.25);
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s;
+}
+
+.btn-danger:hover {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+/* Content Type Sub-Tabs */
+
+.content-type-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 12px;
+}
+
+.content-type-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-sans);
+}
+
+.content-type-btn i {
+  width: 14px;
+  height: 14px;
+}
+
+.content-type-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--color-accent);
+}
+
+.content-type-btn.active {
+  background: var(--bg-secondary);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Admin Content Lists */
+.admin-list-scroll {
+  max-height: 480px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-list-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.admin-list-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.admin-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.admin-list-item:hover {
+  border-color: var(--border-color);
+}
+
+.admin-list-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-list-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-list-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(66,133,244,0.1);
+  color: var(--color-accent);
+  border: 1px solid rgba(66,133,244,0.2);
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+
 .floating-consultancy-tab {
   position: fixed;
   bottom: 24px;
@@ -4833,6 +6162,10 @@ CSS Styles for Biblioteca Inteligente App
   }
   
   .footer-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row {
     grid-template-columns: 1fr;
   }
 }
