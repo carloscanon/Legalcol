@@ -173,7 +173,7 @@
                 </p>
 
                 <!-- Spectacular search bar -->
-                <div class="search-bar-spectacular">
+                <div class="search-bar-spectacular" :style="{ maxWidth: homeSearchWidth }">
                   <div class="search-input-wrapper">
                     <i data-lucide="search" class="search-icon-spec"></i>
                     <input 
@@ -2013,6 +2013,17 @@
                     <span>800px (Grande)</span>
                   </div>
                 </div>
+
+                <h4 class="mt-20 mb-12" style="font-size:0.95rem;font-weight:600;">Buscador Principal en Inicio</h4>
+                <div class="form-group">
+                  <label>Ancho Máximo del Buscador</label>
+                  <select v-model="homeSearchWidth" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);">
+                    <option value="580px">Estándar (580px)</option>
+                    <option value="780px">Grande (780px)</option>
+                    <option value="1000px">Muy Grande (1000px)</option>
+                    <option value="100%">Extremo a Extremo (100%)</option>
+                  </select>
+                </div>
                 
                 <button class="btn btn-primary w-full mt-20" @click="saveHomeSettings">
                   <i data-lucide="save" style="width:14px;height:14px;"></i> Guardar Configuración de Inicio
@@ -2468,6 +2479,7 @@ export default {
       // Home page featured video customization
       homeFeaturedVideoId: localStorage.getItem('legalcol_home_featured_videoid') || '',
       homeFeaturedVideoWidth: parseInt(localStorage.getItem('legalcol_home_featured_videowidth') || '550'),
+      homeSearchWidth: localStorage.getItem('legalcol_home_search_width') || '780px',
 
       // Supabase connection state
       supabaseUrl: '',
@@ -2812,6 +2824,7 @@ export default {
       localStorage.setItem('legalcol_home_stat3_lbl', this.homeStat3Label);
       localStorage.setItem('legalcol_home_featured_videoid', this.homeFeaturedVideoId);
       localStorage.setItem('legalcol_home_featured_videowidth', this.homeFeaturedVideoWidth.toString());
+      localStorage.setItem('legalcol_home_search_width', this.homeSearchWidth);
 
       if (this.isSupabaseConnected) {
         try {
@@ -2826,6 +2839,7 @@ export default {
           await saveSystemSetting('home_stat3_lbl', this.homeStat3Label);
           await saveSystemSetting('home_featured_videoid', this.homeFeaturedVideoId);
           await saveSystemSetting('home_featured_videowidth', this.homeFeaturedVideoWidth.toString());
+          await saveSystemSetting('home_search_width', this.homeSearchWidth);
         } catch (e) {
           console.error('Error al guardar inicio en Supabase:', e);
         }
@@ -2844,6 +2858,7 @@ export default {
       this.homeStat3Label = 'Asesoría Activa';
       this.homeFeaturedVideoId = '';
       this.homeFeaturedVideoWidth = 550;
+      this.homeSearchWidth = '780px';
       await this.saveHomeSettings();
     },
 
@@ -3053,6 +3068,7 @@ export default {
               if (s.key === 'home_stat3_lbl') this.homeStat3Label = s.value;
               if (s.key === 'home_featured_videoid') this.homeFeaturedVideoId = s.value;
               if (s.key === 'home_featured_videowidth') this.homeFeaturedVideoWidth = parseInt(s.value);
+              if (s.key === 'home_search_width') this.homeSearchWidth = s.value;
             });
           }
         } catch (e) {
@@ -3078,6 +3094,7 @@ export default {
         this.homeStat3Label = localStorage.getItem('legalcol_home_stat3_lbl') || 'Asesoría Activa';
         this.homeFeaturedVideoId = localStorage.getItem('legalcol_home_featured_videoid') || '';
         this.homeFeaturedVideoWidth = parseInt(localStorage.getItem('legalcol_home_featured_videowidth') || '550');
+        this.homeSearchWidth = localStorage.getItem('legalcol_home_search_width') || '780px';
 
         this.normsData = [];
         this.expertsData = [];
@@ -3132,7 +3149,8 @@ export default {
           { key: 'home_stat3_val', value: this.homeStat3Value },
           { key: 'home_stat3_lbl', value: this.homeStat3Label },
           { key: 'home_featured_videoid', value: this.homeFeaturedVideoId || '' },
-          { key: 'home_featured_videowidth', value: this.homeFeaturedVideoWidth.toString() }
+          { key: 'home_featured_videowidth', value: this.homeFeaturedVideoWidth.toString() },
+          { key: 'home_search_width', value: this.homeSearchWidth }
         ]);
 
         alert('Base de datos de Supabase inicializada y configuraciones guardadas.');
