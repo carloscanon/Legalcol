@@ -235,8 +235,8 @@
                   </div>
                   <div class="youtube-video-container" style="border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-sm); padding-bottom: 56.25%; position: relative; height: 0; width: 100%;">
                     <iframe 
-                      :src="homeFeaturedVideoId ? ('https://www.youtube.com/embed/' + homeFeaturedVideoId) : (youtubeVideosData[0] ? youtubeVideosData[0].embedUrl : 'https://www.youtube.com/embed/dQw4w9WgXcQ')" 
-                      :title="homeFeaturedVideoId ? 'Video Destacado Custom' : (youtubeVideosData[0] ? youtubeVideosData[0].title : 'Video Destacado')"
+                      :src="homeFeaturedVideoRandom && randomVideoId ? ('https://www.youtube.com/embed/' + randomVideoId) : (homeFeaturedVideoId ? ('https://www.youtube.com/embed/' + homeFeaturedVideoId) : (youtubeVideosData[0] ? youtubeVideosData[0].embedUrl : 'https://www.youtube.com/embed/dQw4w9WgXcQ'))" 
+                      :title="homeFeaturedVideoRandom && randomVideoId ? 'Video Destacado Aleatorio' : (homeFeaturedVideoId ? 'Video Destacado Custom' : 'Video Destacado')"
                       frameborder="0" 
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                       allowfullscreen
@@ -244,7 +244,7 @@
                     ></iframe>
                   </div>
                   <h4 class="mt-8 text-sm font-bold" style="color: var(--text-primary); line-height: 1.3; margin-top: 8px;">
-                    {{ homeFeaturedVideoId ? (youtubeVideosData.find(v => v.id === homeFeaturedVideoId)?.title || 'Video Personalizado') : (youtubeVideosData[0] ? youtubeVideosData[0].title : 'Cumplimiento de la Ley 1581 en Colombia') }}
+                    {{ homeFeaturedVideoRandom && randomVideoId ? (youtubeVideosData.find(v => v.id === randomVideoId)?.title || 'Video Aleatorio') : (homeFeaturedVideoId ? (youtubeVideosData.find(v => v.id === homeFeaturedVideoId)?.title || 'Video Personalizado') : (youtubeVideosData[0] ? youtubeVideosData[0].title : 'Cumplimiento de la Ley 1581 en Colombia')) }}
                   </h4>
                 </div>
 
@@ -1991,6 +1991,10 @@
                   </select>
                   <input type="text" v-model="homeFeaturedVideoId" placeholder="O pega el ID del video directamente (ej: dQw4w9WgXcQ)" />
                 </div>
+                <div class="form-group mt-12 flex align-center gap-8" style="display: flex; align-items: center; gap: 8px;">
+                  <input type="checkbox" v-model="homeFeaturedVideoRandom" id="randomVideoCheckbox" style="cursor:pointer; width: 18px; height: 18px; accent-color: var(--color-accent);" />
+                  <label for="randomVideoCheckbox" style="cursor:pointer; font-weight: 600; margin: 0; font-size: 0.85rem;">Seleccionar video aleatorio de la plataforma automáticamente</label>
+                </div>
                 <div class="form-group mt-12">
                   <label>Ancho Máximo del Video en Inicio: {{ homeFeaturedVideoWidth }}px</label>
                   <input type="range" v-model.number="homeFeaturedVideoWidth" min="300" max="800" step="10" style="width:100%;accent-color:var(--color-accent);" />
@@ -2467,6 +2471,8 @@ export default {
       homeFeaturedVideoId: localStorage.getItem('legalcol_home_featured_videoid') || '',
       homeFeaturedVideoWidth: parseInt(localStorage.getItem('legalcol_home_featured_videowidth') || '550'),
       homeSearchWidth: localStorage.getItem('legalcol_home_search_width') || '780px',
+      homeFeaturedVideoRandom: localStorage.getItem('legalcol_home_featured_videorandom') === 'true',
+      randomVideoId: '',
 
       // Supabase connection state
       supabaseUrl: '',
@@ -2812,6 +2818,7 @@ export default {
       localStorage.setItem('legalcol_home_featured_videoid', this.homeFeaturedVideoId);
       localStorage.setItem('legalcol_home_featured_videowidth', this.homeFeaturedVideoWidth.toString());
       localStorage.setItem('legalcol_home_search_width', this.homeSearchWidth);
+      localStorage.setItem('legalcol_home_featured_videorandom', this.homeFeaturedVideoRandom.toString());
 
       if (this.isSupabaseConnected) {
         try {
@@ -2827,10 +2834,17 @@ export default {
           await saveSystemSetting('home_featured_videoid', this.homeFeaturedVideoId);
           await saveSystemSetting('home_featured_videowidth', this.homeFeaturedVideoWidth.toString());
           await saveSystemSetting('home_search_width', this.homeSearchWidth);
+          await saveSystemSetting('home_featured_videorandom', this.homeFeaturedVideoRandom.toString());
         } catch (e) {
           console.error('Error al guardar inicio en Supabase:', e);
         }
       }
+      
+      if (this.homeFeaturedVideoRandom && this.youtubeVideosData.length > 0) {
+        const randomIndex = Math.floor(Math.random() * this.youtubeVideosData.length);
+        this.randomVideoId = this.youtubeVideosData[randomIndex].id;
+      }
+      
       alert('Configuración de inicio guardada con éxito.');
     },
     async resetHomeSettings() {
@@ -2846,6 +2860,7 @@ export default {
       this.homeFeaturedVideoId = '';
       this.homeFeaturedVideoWidth = 550;
       this.homeSearchWidth = '780px';
+      this.homeFeaturedVideoRandom = false;
       await this.saveHomeSettings();
     },
 
@@ -3056,7 +3071,12 @@ export default {
               if (s.key === 'home_featured_videoid') this.homeFeaturedVideoId = s.value;
               if (s.key === 'home_featured_videowidth') this.homeFeaturedVideoWidth = parseInt(s.value);
               if (s.key === 'home_search_width') this.homeSearchWidth = s.value;
+              if (s.key === 'home_featured_videorandom') this.homeFeaturedVideoRandom = s.value === 'true';
             });
+            if (this.homeFeaturedVideoRandom && this.youtubeVideosData.length > 0) {
+              const randomIndex = Math.floor(Math.random() * this.youtubeVideosData.length);
+              this.randomVideoId = this.youtubeVideosData[randomIndex].id;
+            }
           }
         } catch (e) {
           console.error('Error al cargar datos desde Supabase:', e);
@@ -3137,7 +3157,8 @@ export default {
           { key: 'home_stat3_lbl', value: this.homeStat3Label },
           { key: 'home_featured_videoid', value: this.homeFeaturedVideoId || '' },
           { key: 'home_featured_videowidth', value: this.homeFeaturedVideoWidth.toString() },
-          { key: 'home_search_width', value: this.homeSearchWidth }
+          { key: 'home_search_width', value: this.homeSearchWidth },
+          { key: 'home_featured_videorandom', value: this.homeFeaturedVideoRandom.toString() }
         ]);
 
         alert('Base de datos de Supabase inicializada y configuraciones guardadas.');
