@@ -2831,8 +2831,7 @@ export default {
 
     // Session and Auth management
     async checkUserSession() {
-      const isConnected = await testConnection();
-      if (!isConnected) return;
+      if (!this.isSupabaseConnected) return;
       try {
         const session = await getCurrentUserSession();
         if (session) {
