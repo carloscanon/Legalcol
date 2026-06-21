@@ -88,8 +88,7 @@ export async function fetchNorms() {
     content: item.content,
     aiSummary: item.ai_summary,
     aiObligations: item.ai_obligations || [],
-    relatedVideoId: item.related_video_id,
-    pdfUrl: item.pdf_url
+    relatedVideoId: item.related_video_id
   }));
 }
 
@@ -183,8 +182,7 @@ export async function insertNorms(normsList) {
     content: item.content,
     ai_summary: item.aiSummary,
     ai_obligations: item.aiObligations,
-    related_video_id: item.relatedVideoId,
-    pdf_url: item.pdfUrl
+    related_video_id: item.relatedVideoId
   }));
   const { error } = await supabaseClient.from('norms').upsert(payload, { onConflict: 'id' });
   if (error) throw error;
