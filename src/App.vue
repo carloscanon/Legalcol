@@ -283,7 +283,7 @@
           <h2 class="section-title">Acceso rápido a categorías</h2>
           <div class="grid grid-categories">
             <div 
-              v-for="cat in categoriesData" 
+              v-for="cat in categoriesData.slice(0, homeCategoriesLimit)" 
               :key="cat.id" 
               class="category-card" 
               @click="selectCategoryFilter(cat.id)"
@@ -2091,6 +2091,11 @@
                     <option value="100%">Extremo a Extremo (100%)</option>
                   </select>
                 </div>
+
+                <div class="form-group mt-12">
+                  <label>Límite de Categorías en Inicio</label>
+                  <input type="number" v-model.number="homeCategoriesLimit" min="1" max="50" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);" />
+                </div>
                 
                 <button class="btn btn-primary w-full mt-20" @click="saveHomeSettings">
                   <i data-lucide="save" style="width:14px;height:14px;"></i> Guardar Configuración de Inicio
@@ -2552,6 +2557,7 @@ export default {
       homeSearchWidth: localStorage.getItem('legalcol_home_search_width') || '780px',
       homeFeaturedVideoRandom: localStorage.getItem('legalcol_home_featured_videorandom') === 'true',
       randomVideoId: '',
+      homeCategoriesLimit: parseInt(localStorage.getItem('legalcol_home_categories_limit') || '5'),
 
       // Supabase connection state
       supabaseUrl: '',
@@ -2906,6 +2912,7 @@ export default {
       localStorage.setItem('legalcol_home_featured_videowidth', this.homeFeaturedVideoWidth.toString());
       localStorage.setItem('legalcol_home_search_width', this.homeSearchWidth);
       localStorage.setItem('legalcol_home_featured_videorandom', this.homeFeaturedVideoRandom.toString());
+      localStorage.setItem('legalcol_home_categories_limit', this.homeCategoriesLimit.toString());
 
       if (this.isSupabaseConnected) {
         try {
@@ -2922,6 +2929,7 @@ export default {
           await saveSystemSetting('home_featured_videowidth', this.homeFeaturedVideoWidth.toString());
           await saveSystemSetting('home_search_width', this.homeSearchWidth);
           await saveSystemSetting('home_featured_videorandom', this.homeFeaturedVideoRandom.toString());
+          await saveSystemSetting('home_categories_limit', this.homeCategoriesLimit.toString());
         } catch (e) {
           console.error('Error al guardar inicio en Supabase:', e);
         }
@@ -2948,6 +2956,7 @@ export default {
       this.homeFeaturedVideoWidth = 550;
       this.homeSearchWidth = '780px';
       this.homeFeaturedVideoRandom = false;
+      this.homeCategoriesLimit = 5;
       await this.saveHomeSettings();
     },
 
@@ -3183,6 +3192,7 @@ export default {
               if (s.key === 'home_featured_videowidth') this.homeFeaturedVideoWidth = parseInt(s.value);
               if (s.key === 'home_search_width') this.homeSearchWidth = s.value;
               if (s.key === 'home_featured_videorandom') this.homeFeaturedVideoRandom = s.value === 'true';
+              if (s.key === 'home_categories_limit') this.homeCategoriesLimit = parseInt(s.value) || 5;
             });
             if (this.homeFeaturedVideoRandom && this.youtubeVideosData.length > 0) {
               const randomIndex = Math.floor(Math.random() * this.youtubeVideosData.length);
@@ -3213,6 +3223,7 @@ export default {
         this.homeFeaturedVideoId = localStorage.getItem('legalcol_home_featured_videoid') || '';
         this.homeFeaturedVideoWidth = parseInt(localStorage.getItem('legalcol_home_featured_videowidth') || '550');
         this.homeSearchWidth = localStorage.getItem('legalcol_home_search_width') || '780px';
+        this.homeCategoriesLimit = parseInt(localStorage.getItem('legalcol_home_categories_limit') || '5');
         this.categoriesData = [
           { id: 'Ley', name: 'Leyes', description: 'Leyes Estatutarias y Ordinarias', icon: 'scroll', color: 'bg-blue' },
           { id: 'Decreto', name: 'Decretos', description: 'Decretos Reglamentarios y Únicos', icon: 'file-text', color: 'bg-purple' },
@@ -3275,7 +3286,8 @@ export default {
           { key: 'home_featured_videoid', value: this.homeFeaturedVideoId || '' },
           { key: 'home_featured_videowidth', value: this.homeFeaturedVideoWidth.toString() },
           { key: 'home_search_width', value: this.homeSearchWidth },
-          { key: 'home_featured_videorandom', value: this.homeFeaturedVideoRandom.toString() }
+          { key: 'home_featured_videorandom', value: this.homeFeaturedVideoRandom.toString() },
+          { key: 'home_categories_limit', value: this.homeCategoriesLimit.toString() }
         ]);
 
         alert('Base de datos de Supabase inicializada y configuraciones guardadas.');
