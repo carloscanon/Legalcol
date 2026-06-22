@@ -1147,17 +1147,26 @@
 
             <!-- YouTube Video Filter Tags -->
             <div class="yt-tags-bar mt-24">
-              <span class="yt-tag-pill active">Todos</span>
-              <span class="yt-tag-pill">Protección de Datos</span>
-              <span class="yt-tag-pill">Salud</span>
-              <span class="yt-tag-pill">Ciberseguridad</span>
-              <span class="yt-tag-pill">IA & Innovación</span>
-              <span class="yt-tag-pill">Recientes</span>
+              <span class="yt-tag-pill" :class="{ active: activeVideoCategory === '' }" @click="activeVideoCategory = ''">Todos</span>
+              <span 
+                v-for="cat in categoriesData" 
+                :key="cat.id" 
+                class="yt-tag-pill" 
+                :class="{ active: activeVideoCategory === cat.id }" 
+                @click="activeVideoCategory = cat.id"
+              >
+                {{ cat.name }}
+              </span>
             </div>
 
             <!-- Video Grid -->
             <div class="yt-video-grid mt-24">
-              <div v-for="video in youtubeVideosData" :key="video.id" class="yt-video-card" @click="selectedVideo = video">
+              <div 
+                v-for="video in youtubeVideosData.filter(v => !activeVideoCategory || v.category === activeVideoCategory)" 
+                :key="video.id" 
+                class="yt-video-card" 
+                @click="selectedVideo = video"
+              >
                 <div class="yt-video-thumbnail">
                   <img :src="video.thumbnail" :alt="video.title" />
                   <span class="yt-video-time">{{ video.duration }}</span>
@@ -1713,12 +1722,7 @@
                   <div class="form-group mt-12">
                     <label>Categoría</label>
                     <select v-model="newVideoForm.category">
-                      <option value="Educativo">Educativo</option>
-                      <option value="Análisis">Análisis Normativo</option>
-                      <option value="Laboral">Laboral</option>
-                      <option value="Tributario">Tributario</option>
-                      <option value="Tecnología">Tecnología & Datos</option>
-                      <option value="Contratación">Contratación</option>
+                      <option v-for="cat in categoriesData" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                     </select>
                   </div>
                   <div class="form-group mt-12">
@@ -2593,6 +2597,7 @@ export default {
       filterStatus: '',
       filterYear: '',
       filterCountry: '',
+      activeVideoCategory: '',
 
       // Document Visor Selection
       selectedNorm: null,
@@ -3798,7 +3803,7 @@ export default {
         duration: this.newVideoForm.duration || '10:00',
         views: this.newVideoForm.views || '100',
         embedUrl: finalEmbedUrl,
-        category: this.newVideoForm.category || 'Educativo',
+        category: this.newVideoForm.category || (this.categoriesData[0]?.id || 'Ley'),
         thumbnail: finalThumbnail
       };
 
@@ -3822,7 +3827,7 @@ export default {
         }
       }
       this.editingVideoId = '';
-      this.newVideoForm = { id: '', title: '', description: '', duration: '10:00', views: '1K', embedUrl: '', category: 'Educativo', thumbnail: '' };
+      this.newVideoForm = { id: '', title: '', description: '', duration: '10:00', views: '1K', embedUrl: '', category: this.categoriesData[0]?.id || '', thumbnail: '' };
       this.currentTab = 'youtube';
     },
 
@@ -3931,7 +3936,7 @@ export default {
       this.editingCategoryId = '';
       // Reset forms
       this.newNormForm = { title: '', type: 'Ley', fullName: '', summary: '', content: '', sector: 'Tecnología', entity: 'Congreso', keywords: '', relatedVideoId: '', pdfUrl: '' };
-      this.newVideoForm = { id: '', title: '', description: '', duration: '10:00', views: '1K', embedUrl: '', category: 'Educativo', thumbnail: '' };
+      this.newVideoForm = { id: '', title: '', description: '', duration: '10:00', views: '1K', embedUrl: '', category: this.categoriesData[0]?.id || '', thumbnail: '' };
       this.newExpertForm = { id: '', name: '', photo: '', specialty: '', experience: '', price: 100 };
       this.newCourseForm = { id: '', title: '', category: '', duration: '', level: 'Intermedio', instructor: '', price: 0, description: '', image: '' };
       this.newTriviaForm = { theme: '', question: '', option0: '', option1: '', option2: '', option3: '', correctIndex: 0, explanation: '' };
