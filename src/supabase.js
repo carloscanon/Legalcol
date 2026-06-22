@@ -409,3 +409,39 @@ export async function insertDefaultSystemSettings(settingsArray) {
   if (error) throw error;
 }
 
+/**
+ * CATEGORÍAS DE NORMAS (CATEGORIES)
+ */
+export async function fetchCategories() {
+  if (!supabaseClient) return null;
+  const { data, error } = await supabaseClient.from('categories').select('*');
+  if (error) throw error;
+  return data.map(item => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    icon: item.icon,
+    color: item.color
+  }));
+}
+
+export async function insertCategories(categoriesList) {
+  if (!supabaseClient) return;
+  const payload = categoriesList.map(item => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    icon: item.icon,
+    color: item.color
+  }));
+  const { error } = await supabaseClient.from('categories').upsert(payload, { onConflict: 'id' });
+  if (error) throw error;
+}
+
+export async function deleteCategory(id) {
+  if (!supabaseClient) return;
+  const { error } = await supabaseClient.from('categories').delete().eq('id', id);
+  if (error) throw error;
+}
+
+

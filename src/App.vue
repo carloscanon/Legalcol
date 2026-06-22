@@ -282,25 +282,17 @@
         <div class="container section-margin" style="margin-top: 10px;">
           <h2 class="section-title">Acceso rápido a categorías</h2>
           <div class="grid grid-categories">
-            <div class="category-card" @click="selectCategoryFilter('Ley')">
-              <div class="cat-icon bg-blue"><i data-lucide="scroll"></i></div>
-              <h3>Leyes</h3>
-              <p>Leyes Estatutarias y Ordinarias</p>
-            </div>
-            <div class="category-card" @click="selectCategoryFilter('Decreto')">
-              <div class="cat-icon bg-purple"><i data-lucide="file-text"></i></div>
-              <h3>Decretos</h3>
-              <p>Decretos Reglamentarios y Únicos</p>
-            </div>
-            <div class="category-card" @click="selectCategoryFilter('Resolución')">
-              <div class="cat-icon bg-green"><i data-lucide="file-check"></i></div>
-              <h3>Resoluciones</h3>
-              <p>Resoluciones Ministeriales y Técnicas</p>
-            </div>
-            <div class="category-card" @click="selectCategoryFilter('Sentencia')">
-              <div class="cat-icon bg-amber"><i data-lucide="gavel"></i></div>
-              <h3>Sentencias</h3>
-              <p>Jurisprudencia de Altas Cortes</p>
+            <div 
+              v-for="cat in categoriesData" 
+              :key="cat.id" 
+              class="category-card" 
+              @click="selectCategoryFilter(cat.id)"
+            >
+              <div class="cat-icon" :class="cat.color || 'bg-blue'">
+                <i :data-lucide="cat.icon || 'file-text'"></i>
+              </div>
+              <h3>{{ cat.name }}</h3>
+              <p>{{ cat.description }}</p>
             </div>
           </div>
         </div>
@@ -395,17 +387,14 @@
             <div class="google-tab-item" :class="{ active: filterType === '' }" @click="filterType = ''">
               <i data-lucide="search"></i> Todos
             </div>
-            <div class="google-tab-item" :class="{ active: filterType === 'Ley' }" @click="filterType = 'Ley'">
-              <i data-lucide="scroll"></i> Leyes
-            </div>
-            <div class="google-tab-item" :class="{ active: filterType === 'Decreto' }" @click="filterType = 'Decreto'">
-              <i data-lucide="file-text"></i> Decretos
-            </div>
-            <div class="google-tab-item" :class="{ active: filterType === 'Resolución' }" @click="filterType = 'Resolución'">
-              <i data-lucide="file-check"></i> Resoluciones
-            </div>
-            <div class="google-tab-item" :class="{ active: filterType === 'Sentencia' }" @click="filterType = 'Sentencia'">
-              <i data-lucide="gavel"></i> Sentencias
+            <div 
+              v-for="cat in categoriesData" 
+              :key="cat.id" 
+              class="google-tab-item" 
+              :class="{ active: filterType === cat.id }" 
+              @click="filterType = cat.id"
+            >
+              <i :data-lucide="cat.icon || 'file-text'"></i> {{ cat.name }}
             </div>
           </div>
 
@@ -1462,6 +1451,7 @@
                 <button class="cms-pill" :class="{ active: adminActiveContentForm === 'expert' }" @click="adminActiveContentForm='expert'; editingExpertId=''; cmsSearch=''"><i data-lucide="user-check"></i> Expertos <span class="cms-pill-count">{{ expertsData.length }}</span></button>
                 <button class="cms-pill" :class="{ active: adminActiveContentForm === 'course' }" @click="adminActiveContentForm='course'; editingCourseId=''; cmsSearch=''"><i data-lucide="graduation-cap"></i> Cursos <span class="cms-pill-count">{{ coursesData.length }}</span></button>
                 <button class="cms-pill" :class="{ active: adminActiveContentForm === 'trivia' }" @click="adminActiveContentForm='trivia'; editingTriviaId=''; cmsSearch=''"><i data-lucide="help-circle"></i> Trivia <span class="cms-pill-count">{{ triviaData.length }}</span></button>
+                <button class="cms-pill" :class="{ active: adminActiveContentForm === 'category' }" @click="adminActiveContentForm='category'; editingCategoryId=''; cmsSearch=''"><i data-lucide="grid"></i> Categorías <span class="cms-pill-count">{{ categoriesData.length }}</span></button>
               </div>
             </div>
 
@@ -1580,6 +1570,27 @@
                     </tbody>
                   </table>
                 </div>
+
+                <!-- ---- TABLA: CATEGORÍAS ---- -->
+                <div v-if="adminActiveContentForm === 'category'" class="cms-table-wrap">
+                  <table class="cms-table">
+                    <thead><tr><th>ID/Código</th><th>Nombre</th><th>Descripción</th><th>Icono</th><th>Color</th><th style="width:90px;text-align:center;">Acciones</th></tr></thead>
+                    <tbody>
+                      <tr v-for="(cat, idx) in categoriesData.filter(x => !cmsSearch || x.name?.toLowerCase().includes(cmsSearch.toLowerCase()) || x.description?.toLowerCase().includes(cmsSearch.toLowerCase()))" :key="cat.id || idx" :class="{ 'cms-row-active': editingCategoryId === cat.id }">
+                        <td><code>{{ cat.id }}</code></td>
+                        <td class="cms-cell-primary">{{ cat.name }}</td>
+                        <td class="cms-cell-secondary" style="max-width:200px;">{{ cat.description }}</td>
+                        <td><i :data-lucide="cat.icon || 'file-text'" style="width:16px;height:16px;"></i> <code>{{ cat.icon }}</code></td>
+                        <td><span class="badge-status vigente" :class="cat.color || 'bg-blue'" style="padding: 2px 6px; font-size: 0.65rem;">{{ cat.color }}</span></td>
+                        <td class="cms-actions-cell">
+                          <button class="cms-btn-edit" @click="editCategoryEntry(cat)" title="Editar"><i data-lucide="pencil" style="width:13px;height:13px;"></i></button>
+                          <button class="cms-btn-delete" @click="deleteCategoryEntry(cat.id)" title="Eliminar"><i data-lucide="trash-2" style="width:13px;height:13px;"></i></button>
+                        </td>
+                      </tr>
+                      <tr v-if="categoriesData.length === 0"><td colspan="6" class="cms-empty">No hay categorías registradas.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               <!-- ============ PANEL DERECHO: FORMULARIO ============ -->
@@ -1594,10 +1605,11 @@
                       <span v-if="adminActiveContentForm==='expert'">{{ editingExpertId ? '✏️ Editar Experto' : '+ Nuevo Experto' }}</span>
                       <span v-if="adminActiveContentForm==='course'">{{ editingCourseId ? '✏️ Editar Curso' : '+ Nuevo Curso' }}</span>
                       <span v-if="adminActiveContentForm==='trivia'">{{ editingTriviaId ? '✏️ Editar Pregunta' : '+ Nueva Pregunta' }}</span>
+                      <span v-if="adminActiveContentForm==='category'">{{ editingCategoryId ? '✏️ Editar Categoría' : '+ Nueva Categoría' }}</span>
                     </h4>
-                    <p class="text-secondary" style="font-size:0.75rem;margin:2px 0 0 0;" v-if="editingNormId||editingVideoId||editingExpertId||editingCourseId||editingTriviaId">Modificando registro existente</p>
+                    <p class="text-secondary" style="font-size:0.75rem;margin:2px 0 0 0;" v-if="editingNormId||editingVideoId||editingExpertId||editingCourseId||editingTriviaId||editingCategoryId">Modificando registro existente</p>
                   </div>
-                  <button v-if="editingNormId||editingVideoId||editingExpertId||editingCourseId||editingTriviaId" type="button" @click="clearCmsForm()" title="Cancelar edición" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;color:var(--text-secondary);">✕ Cancelar</button>
+                  <button v-if="editingNormId||editingVideoId||editingExpertId||editingCourseId||editingTriviaId||editingCategoryId" type="button" @click="clearCmsForm()" title="Cancelar edición" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;color:var(--text-secondary);">✕ Cancelar</button>
                 </div>
 
                 <!-- === FORM: NORMATIVA === -->
@@ -1610,13 +1622,7 @@
                     <div class="form-group">
                       <label>Tipo *</label>
                       <select v-model="newNormForm.type" required>
-                        <option value="Ley">Ley</option>
-                        <option value="Decreto">Decreto</option>
-                        <option value="Resolución">Resolución</option>
-                        <option value="Circular">Circular</option>
-                        <option value="Sentencia">Sentencia</option>
-                        <option value="Acuerdo">Acuerdo</option>
-                        <option value="Directiva">Directiva</option>
+                        <option v-for="cat in categoriesData" :key="cat.id" :value="cat.id">{{ cat.id }}</option>
                       </select>
                     </div>
                   </div>
@@ -1863,6 +1869,61 @@
                       <i data-lucide="save" style="width:14px;height:14px;"></i> {{ editingTriviaId ? 'Guardar Cambios' : 'Publicar Pregunta' }}
                     </button>
                     <button v-if="editingTriviaId" type="button" @click="deleteTriviaQuestionEntry(editingTriviaId)" class="btn btn-danger">
+                      <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Eliminar
+                    </button>
+                  </div>
+                </form>
+
+                <!-- === FORM: CATEGORY === -->
+                <form v-if="adminActiveContentForm === 'category'" @submit.prevent="addNewCategory" class="cms-form-body">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>ID / Código de Categoría *</label>
+                      <input type="text" v-model="newCategoryForm.id" required :disabled="!!editingCategoryId" placeholder="Ej: Circular" />
+                      <p class="text-secondary" style="font-size:0.65rem;margin:4px 0 0 0;" v-if="!editingCategoryId">Debe ser único, sin acentos ni espacios (Ej: Circular)</p>
+                    </div>
+                    <div class="form-group">
+                      <label>Nombre Público *</label>
+                      <input type="text" v-model="newCategoryForm.name" required placeholder="Ej: Circulares" />
+                    </div>
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Descripción / Alcance *</label>
+                    <input type="text" v-model="newCategoryForm.description" required placeholder="Ej: Circulares de entes de control" />
+                  </div>
+                  <div class="form-row mt-12">
+                    <div class="form-group">
+                      <label>Icono (Lucide) *</label>
+                      <select v-model="newCategoryForm.icon" required>
+                        <option value="scroll">scroll (Leyes)</option>
+                        <option value="file-text">file-text (Decretos)</option>
+                        <option value="file-check">file-check (Resoluciones)</option>
+                        <option value="gavel">gavel (Sentencias)</option>
+                        <option value="file">file (Genérico)</option>
+                        <option value="file-minus">file-minus (Circulares)</option>
+                        <option value="book-open">book-open (Libro)</option>
+                        <option value="sparkles">sparkles (Brillo)</option>
+                        <option value="shield">shield (Escudo)</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Color visual *</label>
+                      <select v-model="newCategoryForm.color" required>
+                        <option value="bg-blue">Azul</option>
+                        <option value="bg-purple">Morado</option>
+                        <option value="bg-green">Verde</option>
+                        <option value="bg-amber">Ámbar / Naranja</option>
+                        <option value="bg-red">Rojo</option>
+                        <option value="bg-pink">Rosa</option>
+                        <option value="bg-teal">Azul Verdoso</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="cms-form-actions mt-20">
+                    <button type="submit" class="btn btn-primary">
+                      <i data-lucide="save" style="width:14px;height:14px;"></i> {{ editingCategoryId ? 'Guardar Cambios' : 'Crear Categoría' }}
+                    </button>
+                    <button v-if="editingCategoryId" type="button" @click="deleteCategoryEntry(editingCategoryId)" class="btn btn-danger">
                       <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Eliminar
                     </button>
                   </div>
@@ -2442,7 +2503,10 @@ import {
   deleteYoutubeVideo,
   fetchSystemSettings,
   saveSystemSetting,
-  insertDefaultSystemSettings
+  insertDefaultSystemSettings,
+  fetchCategories,
+  insertCategories,
+  deleteCategory
 } from './supabase.js';
 
 export default {
@@ -2500,6 +2564,9 @@ export default {
       editingExpertId: '',
       editingCourseId: '',
       editingTriviaId: '',
+      editingCategoryId: '',
+      newCategoryForm: { id: '', name: '', description: '', icon: 'file-text', color: 'bg-blue' },
+      categoriesData: [],
       // CMS Module state
       cmsSearch: '',
       // Mobile Responsive Menu State
@@ -3042,6 +3109,24 @@ export default {
         this.isSupabaseConnected = true;
         this.connectionStatusText = 'Conectado';
         try {
+          const dbCategories = await fetchCategories();
+          if (dbCategories && dbCategories.length > 0) {
+            this.categoriesData = dbCategories;
+          } else {
+            const defaults = [
+              { id: 'Ley', name: 'Leyes', description: 'Leyes Estatutarias y Ordinarias', icon: 'scroll', color: 'bg-blue' },
+              { id: 'Decreto', name: 'Decretos', description: 'Decretos Reglamentarios y Únicos', icon: 'file-text', color: 'bg-purple' },
+              { id: 'Resolución', name: 'Resoluciones', description: 'Resoluciones Ministeriales y Técnicas', icon: 'file-check', color: 'bg-green' },
+              { id: 'Sentencia', name: 'Sentencias', description: 'Jurisprudencia de Altas Cortes', icon: 'gavel', color: 'bg-amber' }
+            ];
+            this.categoriesData = defaults;
+            try {
+              await insertCategories(defaults);
+            } catch (e) {
+              console.warn("No se pudieron inicializar las categorías en Supabase:", e);
+            }
+          }
+
           const dbNorms = await fetchNorms();
           if (dbNorms) this.normsData = dbNorms;
           
@@ -3112,6 +3197,12 @@ export default {
         this.homeFeaturedVideoId = localStorage.getItem('legalcol_home_featured_videoid') || '';
         this.homeFeaturedVideoWidth = parseInt(localStorage.getItem('legalcol_home_featured_videowidth') || '550');
         this.homeSearchWidth = localStorage.getItem('legalcol_home_search_width') || '780px';
+        this.categoriesData = [
+          { id: 'Ley', name: 'Leyes', description: 'Leyes Estatutarias y Ordinarias', icon: 'scroll', color: 'bg-blue' },
+          { id: 'Decreto', name: 'Decretos', description: 'Decretos Reglamentarios y Únicos', icon: 'file-text', color: 'bg-purple' },
+          { id: 'Resolución', name: 'Resoluciones', description: 'Resoluciones Ministeriales y Técnicas', icon: 'file-check', color: 'bg-green' },
+          { id: 'Sentencia', name: 'Sentencias', description: 'Jurisprudencia de Altas Cortes', icon: 'gavel', color: 'bg-amber' }
+        ];
 
         this.normsData = [];
         this.expertsData = [];
@@ -3826,12 +3917,14 @@ export default {
       this.editingExpertId = '';
       this.editingCourseId = '';
       this.editingTriviaId = '';
+      this.editingCategoryId = '';
       // Reset forms
       this.newNormForm = { title: '', type: 'Ley', fullName: '', summary: '', content: '', sector: 'Tecnología', entity: 'Congreso', keywords: '', relatedVideoId: '', pdfUrl: '' };
       this.newVideoForm = { id: '', title: '', description: '', duration: '10:00', views: '1K', embedUrl: '', category: 'Educativo', thumbnail: '' };
       this.newExpertForm = { id: '', name: '', photo: '', specialty: '', experience: '', price: 100 };
       this.newCourseForm = { id: '', title: '', category: '', duration: '', level: 'Intermedio', instructor: '', price: 0, description: '', image: '' };
       this.newTriviaForm = { theme: '', question: '', option0: '', option1: '', option2: '', option3: '', correctIndex: 0, explanation: '' };
+      this.newCategoryForm = { id: '', name: '', description: '', icon: 'file-text', color: 'bg-blue' };
     },
 
     async addNewTrivia() {
@@ -3865,6 +3958,80 @@ export default {
       }
       await this.loadAllData();
       this.newTriviaForm = { theme: '', question: '', option0: '', option1: '', option2: '', option3: '', correctIndex: 0, explanation: '' };
+    },
+
+    editCategoryEntry(cat) {
+      this.editingCategoryId = cat.id;
+      this.newCategoryForm = {
+        id: cat.id,
+        name: cat.name,
+        description: cat.description,
+        icon: cat.icon || 'file-text',
+        color: cat.color || 'bg-blue'
+      };
+      this.adminActiveContentForm = 'category';
+      this.$nextTick(() => {
+        const el = document.querySelector('.admin-panel-card');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    },
+
+    async deleteCategoryEntry(id) {
+      if (!id || !confirm('¿Eliminar esta categoría permanentemente?')) return;
+      if (this.isSupabaseConnected) {
+        try {
+          await deleteCategory(id);
+          await this.loadAllData();
+          alert('Categoría eliminada de la Base de Datos.');
+        } catch (e) {
+          alert('Error al eliminar categoría: ' + e.message);
+        }
+      } else {
+        this.categoriesData = this.categoriesData.filter(c => c.id !== id);
+        alert('Categoría eliminada temporalmente de memoria.');
+      }
+      this.clearCmsForm();
+    },
+
+    async addNewCategory() {
+      const catId = this.newCategoryForm.id.trim();
+      if (!catId) {
+        alert('El ID es obligatorio.');
+        return;
+      }
+      
+      const payload = {
+        id: catId,
+        name: this.newCategoryForm.name,
+        description: this.newCategoryForm.description,
+        icon: this.newCategoryForm.icon,
+        color: this.newCategoryForm.color
+      };
+
+      if (this.isSupabaseConnected) {
+        try {
+          await insertCategories([payload]);
+          alert(this.editingCategoryId ? 'Categoría actualizada en la Base de Datos.' : 'Categoría creada en la Base de Datos.');
+        } catch (e) {
+          console.error(e);
+          alert('Error al guardar la categoría: ' + e.message);
+        }
+      } else {
+        if (this.editingCategoryId) {
+          const idx = this.categoriesData.findIndex(c => c.id === this.editingCategoryId);
+          if (idx !== -1) this.categoriesData.splice(idx, 1, payload);
+          alert('Categoría actualizada temporalmente en memoria.');
+        } else {
+          if (this.categoriesData.some(c => c.id.toLowerCase() === catId.toLowerCase())) {
+            alert('Ya existe una categoría con ese ID.');
+            return;
+          }
+          this.categoriesData.push(payload);
+          alert('Categoría creada temporalmente en memoria.');
+        }
+      }
+      await this.loadAllData();
+      this.clearCmsForm();
     }
   }
 }

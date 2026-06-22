@@ -31,6 +31,7 @@ DROP TABLE IF EXISTS norms CASCADE;
 DROP TABLE IF EXISTS user_profiles CASCADE;
 DROP TABLE IF EXISTS membership_plans CASCADE;
 DROP TABLE IF EXISTS system_settings CASCADE;
+DROP TABLE IF EXISTS categories CASCADE;
 
 -- =============================================================================
 -- SECCIÓN 0: CONFIGURACIONES GENERALES DEL SISTEMA
@@ -40,6 +41,16 @@ CREATE TABLE system_settings (
     value TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+CREATE TABLE categories (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    icon TEXT DEFAULT 'file-text',
+    color TEXT DEFAULT 'bg-blue',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 
 
 -- =============================================================================
@@ -364,6 +375,7 @@ ALTER TABLE youtube_videos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE video_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE video_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE system_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 
 -- POLÍTICAS BÁSICAS DE LECTURA PÚBLICA / ESCRITURA AUTENTICADA
 CREATE POLICY "Lectura pública de membresías" ON membership_plans FOR SELECT USING (true);
@@ -378,6 +390,7 @@ CREATE POLICY "Lectura pública de trivia" ON trivia_questions FOR SELECT USING 
 CREATE POLICY "Lectura pública de videos" ON youtube_videos FOR SELECT USING (true);
 CREATE POLICY "Lectura pública de comentarios de videos" ON video_comments FOR SELECT USING (true);
 CREATE POLICY "Lectura pública de configuraciones" ON system_settings FOR SELECT USING (true);
+CREATE POLICY "Lectura pública de categorías" ON categories FOR SELECT USING (true);
 
 -- POLÍTICAS EXCLUSIVAS DEL USUARIO AUTENTICADO
 CREATE POLICY "Gestión de perfil personal" ON user_profiles FOR ALL USING (auth.uid() = id);
@@ -399,4 +412,6 @@ CREATE POLICY "Permitir gestión de administradores o debug" ON courses FOR ALL 
 CREATE POLICY "Permitir gestión de administradores o debug" ON trivia_questions FOR ALL USING (true);
 CREATE POLICY "Permitir gestión de administradores o debug" ON youtube_videos FOR ALL USING (true);
 CREATE POLICY "Permitir gestión de administradores o debug" ON system_settings FOR ALL USING (true);
+CREATE POLICY "Permitir gestión de administradores o debug" ON categories FOR ALL USING (true);
+
 
