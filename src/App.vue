@@ -1904,6 +1904,17 @@
                         <option value="book-open">book-open (Libro)</option>
                         <option value="sparkles">sparkles (Brillo)</option>
                         <option value="shield">shield (Escudo)</option>
+                        <option value="briefcase">briefcase (Portafolio / Negocios)</option>
+                        <option value="scale">scale (Justicia / Balanza)</option>
+                        <option value="landmark">landmark (Gobierno / Entidades)</option>
+                        <option value="alert-triangle">alert-triangle (Riesgos / Alertas)</option>
+                        <option value="check-square">check-square (Cumplimiento)</option>
+                        <option value="globe">globe (Internacional / Global)</option>
+                        <option value="users">users (Personas / Social)</option>
+                        <option value="award">award (Premios / Logros)</option>
+                        <option value="search">search (Búsqueda / Auditoría)</option>
+                        <option value="database">database (Base de Datos / Registros)</option>
+                        <option value="help-circle">help-circle (Ayuda / Guías)</option>
                       </select>
                     </div>
                     <div class="form-group">
